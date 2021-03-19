@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: credential provider for actions-aws-assume-role
+
+Resources:
+  ProviderFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      CodeUri: assume-role/
+      Handler: assume-role
+      Runtime: provided.al2
+      Events:
+        CatchAll:
+          Type: HttpApi
+          Properties:
+            Path: /assume-role
+            Method: POST
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - sts:AssumeRole
+              Resource: "*"
