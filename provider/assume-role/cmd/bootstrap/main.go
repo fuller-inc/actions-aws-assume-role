@@ -36,7 +36,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		RoleSessionName: aws.String("GitHubActions"),
 	})
 	if err != nil {
-		log.Println("failed to assume role: %v", err)
+		log.Printf("failed to assume role: %v", err)
 		http.Error(w, "error", http.StatusInternalServerError)
 		return
 	}

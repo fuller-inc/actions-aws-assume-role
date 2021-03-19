@@ -1,4 +1,4 @@
-module main
+module github.com/shogo82148/actions-aws-assume-role/provider/assume-role
 
 go 1.16
 
