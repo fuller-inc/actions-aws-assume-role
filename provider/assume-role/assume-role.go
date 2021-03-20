@@ -10,10 +10,12 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/smithy-go"
 	"github.com/shogo82148/actions-aws-assume-role/provider/assume-role/github"
 )
 
@@ -65,9 +67,10 @@ type requestBody struct {
 }
 
 type responseBody struct {
-	AccessKeyId     string `json:"access_key_id"`
-	SecretAccessKey string `json:"secret_access_key"`
-	SessionToken    string `json:"session_token"`
+	AccessKeyId     string    `json:"access_key_id"`
+	SecretAccessKey string    `json:"secret_access_key"`
+	SessionToken    string    `json:"session_token"`
+	Expiration      time.Time `json:"expiration"`
 }
 
 type errorResponseBody struct {
@@ -107,16 +110,30 @@ func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, 
 		return nil, err
 	}
 
-	resp, err := h.sts.AssumeRole(ctx, &sts.AssumeRoleInput{
-		RoleArn:         aws.String("arn:aws:iam::445285296882:role/assume-role-test"),
-		RoleSessionName: aws.String("GitHubActions"),
-	})
+	resp, err := h.assumeRole(ctx, req)
 	if err != nil {
+		var validation *validationError
+		if errors.As(err, &validation) {
+			h.updateCommitStatus(ctx, req, &github.CreateStatusRequest{
+				State:       github.CommitStateFailure,
+				Description: "validation error",
+				Context:     commitStatusContext,
+			})
+		} else {
+			h.updateCommitStatus(ctx, req, &github.CreateStatusRequest{
+				State:       github.CommitStateError,
+				Description: "internal error",
+				Context:     commitStatusContext,
+			})
+		}
 		return nil, err
 	}
-	return &responseBody{
-		AccessKeyId: aws.ToString(resp.Credentials.AccessKeyId),
-	}, nil
+	h.updateCommitStatus(ctx, req, &github.CreateStatusRequest{
+		State:       github.CommitStateSuccess,
+		Description: "AWS credentials are configured",
+		Context:     commitStatusContext,
+	})
+	return resp, nil
 }
 
 func (h *Handler) handleError(w http.ResponseWriter, r *http.Request, err error) {
@@ -187,4 +204,52 @@ func (h *Handler) updateCommitStatus(ctx context.Context, req *requestBody, stat
 	owner := req.Repository[:idx]
 	repo := req.Repository[idx+1:]
 	return h.github.CreateStatus(ctx, req.GitHubToken, owner, repo, req.SHA, status)
+}
+
+func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBody, error) {
+	// validate IAM Role
+	// https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html#external-id-use
+	// > In addition when a customer gives you a role ARN, test whether you can assume the role both with and without the correct external ID.
+	validationInput := &sts.AssumeRoleInput{
+		RoleArn:         aws.String(req.RoleToAssume),
+		RoleSessionName: aws.String(req.RoleSessionName),
+
+		// set shortest duration seconds. because we don't use this credential actually.
+		DurationSeconds: aws.Int32(900),
+
+		// request without the correct external ID
+	}
+	_, err := h.sts.AssumeRole(ctx, validationInput)
+	if err == nil {
+		return nil, &validationError{
+			message: "The AssumeRolePolicy of your IAM Role is too open. Please configure ExternalId conditions.",
+		}
+	}
+	var ae smithy.APIError
+	if !errors.As(err, &ae) || ae.ErrorCode() != "AccessDenied" {
+		// We expected AccessDenied error, but got another error. (maybe network error etc.)
+		// We can't continue this process.
+		return nil, err
+	}
+
+	// assume role with the correct external ID
+	input := *validationInput
+	input.ExternalId = aws.String(req.Repository)
+	input.DurationSeconds = nil
+	resp, err := h.sts.AssumeRole(ctx, &input)
+	if err != nil {
+		var ae smithy.APIError
+		if errors.As(err, &ae) && ae.ErrorCode() == "AccessDenied" {
+			return nil, &validationError{
+				message: ae.ErrorMessage(),
+			}
+		}
+		return nil, err
+	}
+	return &responseBody{
+		AccessKeyId:     aws.ToString(resp.Credentials.AccessKeyId),
+		SecretAccessKey: aws.ToString(resp.Credentials.SecretAccessKey),
+		SessionToken:    aws.ToString(resp.Credentials.SessionToken),
+		Expiration:      aws.ToTime(resp.Credentials.Expiration),
+	}, nil
 }

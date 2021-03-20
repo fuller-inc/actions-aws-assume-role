@@ -6,6 +6,10 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/aws-sdk-go-v2/service/sts/types"
+	"github.com/aws/smithy-go"
 	"github.com/shogo82148/actions-aws-assume-role/provider/assume-role/github"
 )
 
@@ -15,6 +19,14 @@ type githubClientMock struct {
 
 func (c *githubClientMock) CreateStatus(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error) {
 	return c.CreateStatusFunc(ctx, token, owner, repo, ref, status)
+}
+
+type stsClientMock struct {
+	AssumeRoleFunc func(ctx context.Context, params *sts.AssumeRoleInput, optFns ...func(*sts.Options)) (*sts.AssumeRoleOutput, error)
+}
+
+func (c *stsClientMock) AssumeRole(ctx context.Context, params *sts.AssumeRoleInput, optFns ...func(*sts.Options)) (*sts.AssumeRoleOutput, error) {
+	return c.AssumeRoleFunc(ctx, params, optFns...)
 }
 
 func TestValidateGitHubToken(t *testing.T) {
@@ -107,5 +119,69 @@ func TestValidateGitHubToken_InvalidCreator(t *testing.T) {
 	var validate *validationError
 	if !errors.As(err, &validate) {
 		t.Errorf("want validation error, got %T", err)
+	}
+}
+
+func TestAssumeRole_AssumeRolePolicyTooOpen(t *testing.T) {
+	h := &Handler{
+		sts: &stsClientMock{
+			AssumeRoleFunc: func(ctx context.Context, params *sts.AssumeRoleInput, optFns ...func(*sts.Options)) (*sts.AssumeRoleOutput, error) {
+				return &sts.AssumeRoleOutput{}, nil
+			},
+		},
+	}
+	_, err := h.assumeRole(context.Background(), &requestBody{
+		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
+		RoleSessionName: "GitHubActions",
+		Repository:      "shogo82148/actions-aws-assume-role",
+	})
+	var validate *validationError
+	if !errors.As(err, &validate) {
+		t.Errorf("want validation error, got %T", err)
+	}
+}
+
+var errAccessDenied = &awsAccessDeniedError{}
+
+type awsAccessDeniedError struct{}
+
+func (err *awsAccessDeniedError) Error() string                 { return "AccessDenied" }
+func (err *awsAccessDeniedError) ErrorCode() string             { return "AccessDenied" }
+func (err *awsAccessDeniedError) ErrorMessage() string          { return "AccessDenied" }
+func (err *awsAccessDeniedError) ErrorFault() smithy.ErrorFault { return smithy.FaultUnknown }
+
+func TestAssumeRole(t *testing.T) {
+	h := &Handler{
+		sts: &stsClientMock{
+			AssumeRoleFunc: func(ctx context.Context, params *sts.AssumeRoleInput, optFns ...func(*sts.Options)) (*sts.AssumeRoleOutput, error) {
+				if params.ExternalId == nil {
+					return nil, errAccessDenied
+				}
+				return &sts.AssumeRoleOutput{
+					Credentials: &types.Credentials{
+						AccessKeyId:     aws.String("AKIAIOSFODNN7EXAMPLE"),
+						SecretAccessKey: aws.String("wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"),
+						SessionToken:    aws.String("session-token"),
+					},
+				}, nil
+			},
+		},
+	}
+	resp, err := h.assumeRole(context.Background(), &requestBody{
+		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
+		RoleSessionName: "GitHubActions",
+		Repository:      "shogo82148/actions-aws-assume-role",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.AccessKeyId != "AKIAIOSFODNN7EXAMPLE" {
+		t.Errorf("want %q, got %q", "AKIAIOSFODNN7EXAMPLE", resp.AccessKeyId)
+	}
+	if resp.SecretAccessKey != "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" {
+		t.Errorf("want %q, got %q", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY", resp.SecretAccessKey)
+	}
+	if resp.SessionToken != "session-token" {
+		t.Errorf("want %q, got %q", "session-token", resp.SessionToken)
 	}
 }
