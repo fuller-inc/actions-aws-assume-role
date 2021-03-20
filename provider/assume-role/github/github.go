@@ -13,17 +13,17 @@ const (
 	statusContext   = "actions-aws-assume-role"
 )
 
-// GitHubClient is a very light weight GitHub API Client.
-type GitHubClient struct {
+// Client is a very light weight GitHub API Client.
+type Client struct {
 	baseURL    string
 	httpClient *http.Client
 }
 
-func NewGitHubClient(httpClient *http.Client) *GitHubClient {
+func NewClient(httpClient *http.Client) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
-	return &GitHubClient{
+	return &Client{
 		baseURL:    "https://api.github.com",
 		httpClient: httpClient,
 	}
@@ -59,7 +59,7 @@ type CreateStatusResponseCreator struct {
 
 // CreateStatus creates a commit status.
 // https://docs.github.com/en/rest/reference/repos#create-a-commit-status
-func (c *GitHubClient) CreateStatus(ctx context.Context, token, owner, repo, ref string, status *CreateStatusRequest) (*CreateStatusResponse, error) {
+func (c *Client) CreateStatus(ctx context.Context, token, owner, repo, ref string, status *CreateStatusRequest) (*CreateStatusResponse, error) {
 	// build the request
 	u := fmt.Sprintf("%s/repos/%s/%s/statuses/%s", c.baseURL, owner, repo, ref)
 	body, err := json.Marshal(status)

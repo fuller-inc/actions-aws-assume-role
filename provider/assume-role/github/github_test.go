@@ -29,7 +29,7 @@ func TestCreateStatus(t *testing.T) {
 		rw.Write(data)
 	}))
 	defer ts.Close()
-	c := NewGitHubClient(nil)
+	c := NewClient(nil)
 	c.baseURL = ts.URL
 
 	resp, err := c.CreateStatus(context.Background(), "dummy-auth-token", "shogo82148", "actions-aws-assume-role", "496f02e29cc5760443becd7007049c1a2a502b6f", &CreateStatusRequest{
