@@ -10,8 +10,16 @@ import (
 
 const (
 	githubUserAgent = "actions-aws-assume-role/1.0"
-	statusContext   = "actions-aws-assume-role"
+	apiBaseURL      = "https://api.github.com"
 )
+
+type UnexpectedStatusCodeError struct {
+	StatusCode int
+}
+
+func (err *UnexpectedStatusCodeError) Error() string {
+	return fmt.Sprintf("unexpected status code: %d", err.StatusCode)
+}
 
 // Client is a very light weight GitHub API Client.
 type Client struct {
@@ -24,7 +32,7 @@ func NewClient(httpClient *http.Client) *Client {
 		httpClient = http.DefaultClient
 	}
 	return &Client{
-		baseURL:    "https://api.github.com",
+		baseURL:    apiBaseURL,
 		httpClient: httpClient,
 	}
 }
@@ -83,7 +91,7 @@ func (c *Client) CreateStatus(ctx context.Context, token, owner, repo, ref strin
 
 	// parse the response
 	if resp.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return nil, &UnexpectedStatusCodeError{StatusCode: resp.StatusCode}
 	}
 
 	var ret *CreateStatusResponse
