@@ -14,6 +14,8 @@ interface AssumeRoleResult {
   access_key_id: string;
   secret_access_key: string;
   session_token: string;
+  message?: string;
+  warning?: string;
 }
 
 interface AssumeRoleError {
@@ -36,6 +38,14 @@ async function assumeRole(params: AssumeRoleParams) {
     return;
   }
   const resp = result.result as AssumeRoleResult;
+
+  if (resp.message) {
+    core.info(resp.message);
+  }
+
+  if (resp.warning) {
+    core.warning(resp.warning);
+  }
 
   core.setSecret(resp.access_key_id);
   core.exportVariable('AWS_ACCESS_KEY_ID', resp.access_key_id);
