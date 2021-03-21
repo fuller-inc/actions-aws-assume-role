@@ -31,7 +31,7 @@ describe('tests', () => {
       detached: true
     });
     await sleep(1); // wait for starting process
-  }, 20000);
+  }, 60000);
 
   afterAll(async () => {
     subprocess?.kill('SIGTERM');
