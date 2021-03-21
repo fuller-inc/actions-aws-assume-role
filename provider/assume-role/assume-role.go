@@ -10,11 +10,12 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
+	"unicode"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 	"github.com/aws/smithy-go"
 	"github.com/shogo82148/actions-aws-assume-role/provider/assume-role/github"
 )
@@ -62,15 +63,21 @@ type requestBody struct {
 	GitHubToken     string `json:"github_token"`
 	RoleToAssume    string `json:"role_to_assume"`
 	RoleSessionName string `json:"role_session_name"`
+	DurationSeconds int32  `json:"duration_seconds"`
 	Repository      string `json:"repository"`
 	SHA             string `json:"sha"`
+	Action          string `json:"action"`
+	Workflow        string `json:"workflow"`
+	Actor           string `json:"actor"`
+	Branch          string `json:"branch"`
 }
 
 type responseBody struct {
-	AccessKeyId     string    `json:"access_key_id"`
-	SecretAccessKey string    `json:"secret_access_key"`
-	SessionToken    string    `json:"session_token"`
-	Expiration      time.Time `json:"expiration"`
+	AccessKeyId     string `json:"access_key_id"`
+	SecretAccessKey string `json:"secret_access_key"`
+	SessionToken    string `json:"session_token"`
+	Message         string `json:"message,omitempty"`
+	Warning         string `json:"warning,omitempty"`
 }
 
 type errorResponseBody struct {
@@ -207,12 +214,46 @@ func (h *Handler) updateCommitStatus(ctx context.Context, req *requestBody, stat
 }
 
 func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBody, error) {
+	tags := []types.Tag{
+		{
+			Key:   aws.String("GitHub"),
+			Value: aws.String("Actions"),
+		},
+		{
+			Key:   aws.String("Repository"),
+			Value: aws.String(sanitizeTagValue(req.Repository)),
+		},
+		{
+			Key:   aws.String("Workflow"),
+			Value: aws.String(sanitizeTagValue(req.Workflow)),
+		},
+		{
+			Key:   aws.String("Action"),
+			Value: aws.String(sanitizeTagValue(req.Action)),
+		},
+		{
+			Key:   aws.String("Actor"),
+			Value: aws.String(sanitizeTagValue(req.Actor)),
+		},
+		{
+			Key:   aws.String("Commit"),
+			Value: aws.String(sanitizeTagValue(req.SHA)),
+		},
+	}
+	if req.Branch != "" {
+		tags = append(tags, types.Tag{
+			Key:   aws.String("Branch"),
+			Value: aws.String(sanitizeTagValue(req.Branch)),
+		})
+	}
+
 	// validate IAM Role
 	// https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html#external-id-use
 	// > In addition when a customer gives you a role ARN, test whether you can assume the role both with and without the correct external ID.
 	validationInput := &sts.AssumeRoleInput{
 		RoleArn:         aws.String(req.RoleToAssume),
 		RoleSessionName: aws.String(req.RoleSessionName),
+		Tags:            tags,
 
 		// set shortest duration seconds. because we don't use this credential actually.
 		DurationSeconds: aws.Int32(900),
@@ -235,7 +276,7 @@ func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBo
 	// assume role with the correct external ID
 	input := *validationInput
 	input.ExternalId = aws.String(req.Repository)
-	input.DurationSeconds = nil
+	input.DurationSeconds = aws.Int32(req.DurationSeconds)
 	resp, err := h.sts.AssumeRole(ctx, &input)
 	if err != nil {
 		var ae smithy.APIError
@@ -250,6 +291,42 @@ func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBo
 		AccessKeyId:     aws.ToString(resp.Credentials.AccessKeyId),
 		SecretAccessKey: aws.ToString(resp.Credentials.SecretAccessKey),
 		SessionToken:    aws.ToString(resp.Credentials.SessionToken),
-		Expiration:      aws.ToTime(resp.Credentials.Expiration),
 	}, nil
+}
+
+// https://docs.aws.amazon.com/STS/latest/APIReference/API_Tag.html
+const tagSanitizationCharactor = "_"
+const tagMaxValueLength = 256
+
+func sanitizeTagValue(s string) string {
+	var builder strings.Builder
+	builder.Grow(len(s))
+	for i, r := range s {
+		if i >= tagMaxValueLength {
+			break
+		}
+		if validTagRune(r) {
+			builder.WriteRune(r)
+		} else {
+			builder.WriteString(tagSanitizationCharactor)
+		}
+	}
+	return builder.String()
+}
+
+// valid runes are match [\p{L}\p{Z}\p{N}_.:/=+\-@]
+func validTagRune(r rune) bool {
+	switch {
+	case unicode.IsLetter(r):
+		return true // \p{L}
+	case unicode.IsSpace(r):
+		return true // \p{Z}
+	case unicode.IsNumber(r):
+		return true // \p{N}
+	}
+	switch r {
+	case '_', '.', ':', '/', '=', '+', '-', '@':
+		return true
+	}
+	return false
 }

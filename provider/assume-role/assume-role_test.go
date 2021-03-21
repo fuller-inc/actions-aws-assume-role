@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -183,5 +184,39 @@ func TestAssumeRole(t *testing.T) {
 	}
 	if resp.SessionToken != "session-token" {
 		t.Errorf("want %q, got %q", "session-token", resp.SessionToken)
+	}
+}
+
+func TestSanitizeTagValue(t *testing.T) {
+	cases := []struct {
+		input  string
+		output string
+	}{
+		{
+			input:  "abcdefghijklmnopqrstuvwxyz",
+			output: "abcdefghijklmnopqrstuvwxyz",
+		},
+		{
+			input:  "0123456789",
+			output: "0123456789",
+		},
+		{
+			input:  " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~",
+			output: " __________+_-./:__=__@__________",
+		},
+		{
+			input:  "😀",
+			output: "_",
+		},
+		{
+			input:  strings.Repeat("a", 500),
+			output: strings.Repeat("a", 256),
+		},
+	}
+	for _, tc := range cases {
+		got := sanitizeTagValue(tc.input)
+		if got != tc.output {
+			t.Errorf("want %q, got %q", tc.output, got)
+		}
 	}
 }
