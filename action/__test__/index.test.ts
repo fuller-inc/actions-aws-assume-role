@@ -27,7 +27,7 @@ describe('tests', () => {
     await exec.exec('go', ['build', '-o', bin, './cmd/dummy'], {
       cwd: '../provider/assume-role'
     });
-    subprocess = child_process.spawn(bin);
+    // subprocess = child_process.spawn(bin);
     await sleep(1); // wait for starting process
   });
 
