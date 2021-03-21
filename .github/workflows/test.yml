@@ -39,7 +39,7 @@ jobs:
           node-version: "12"
 
       - name: build
-        runs: |
+        run: |
           npm ci
           npm run build
         working-directory: action
