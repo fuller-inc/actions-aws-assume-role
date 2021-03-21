@@ -20,7 +20,7 @@ process.env.GITHUB_REF = 'ref/heads/main';
 
 describe('tests', () => {
   let tmpdir = '';
-  let subprocess: child_process.ChildProcessWithoutNullStreams;
+  let subprocess: child_process.ChildProcess;
   beforeAll(async () => {
     tmpdir = await mkdtemp();
     const bin = `${tmpdir}${sep}dummy${binExt}`;
