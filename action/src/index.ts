@@ -37,19 +37,30 @@ interface AssumeRoleError {
   message: string;
 }
 
+function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
+  if (val === undefined || val === null) {
+    throw new Error(`Missing required environment value. Are you running in GitHub Actions?`);
+  }
+}
+
 async function assumeRole(params: AssumeRoleParams) {
   const {GITHUB_REPOSITORY, GITHUB_WORKFLOW, GITHUB_ACTION, GITHUB_ACTOR, GITHUB_SHA, GITHUB_REF} = process.env;
+  assertIsDefined(GITHUB_REPOSITORY);
+  assertIsDefined(GITHUB_WORKFLOW);
+  assertIsDefined(GITHUB_ACTION);
+  assertIsDefined(GITHUB_ACTOR);
+  assertIsDefined(GITHUB_SHA);
   const payload: AssumeRolePayload = {
     github_token: params.githubToken,
     role_to_assume: params.roleToAssume,
     role_session_name: params.roleSessionName,
     duration_seconds: params.roleDurationSeconds,
-    repository: GITHUB_REPOSITORY || '',
-    sha: GITHUB_SHA || '',
+    repository: GITHUB_REPOSITORY,
+    sha: GITHUB_SHA,
     role_session_tagging: params.roleSessionTagging,
-    action: GITHUB_ACTION || '',
-    workflow: GITHUB_WORKFLOW || '',
-    actor: GITHUB_ACTOR || '',
+    action: GITHUB_ACTION,
+    workflow: GITHUB_WORKFLOW,
+    actor: GITHUB_ACTOR,
     branch: GITHUB_REF || ''
   };
   const client = new http.HttpClient('actions-aws-assume-role');
