@@ -24,8 +24,8 @@ inputs:
     required: true
 runs:
   using: "node12"
-  main: "actions/lib/index.js"
-  post: "actions/lib/cleanup.js"
+  main: "action/lib/index.js"
+  post: "action/lib/cleanup.js"
 branding:
   icon: "cloud"
   color: "blue"
