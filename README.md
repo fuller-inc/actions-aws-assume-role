@@ -89,3 +89,7 @@ The role's trust policy need extra permission `sts:TagSession` for session taggi
   ]
 }
 ```
+
+## How to Work
+
+![How to Work](how-to-work.svg)
