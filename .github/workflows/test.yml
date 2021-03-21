@@ -20,6 +20,10 @@ jobs:
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+      - name: download dependencies
+        run: go mod download
+        working-directory: provider/assume-role
+
       - name: Test
         run: |
           make test
@@ -48,6 +52,10 @@ jobs:
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+
+      - name: download dependencies
+        run: go mod download
+        working-directory: provider/assume-role
 
       - name: Set up Node.js
         uses: actions/setup-node@v1
