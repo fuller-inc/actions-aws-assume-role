@@ -32,7 +32,7 @@ npm run build
 
 : remove development packages from node_modules
 npm prune --production
-perl -ne 'print unless m(^node_modules/|lib/$)' -i .gitignore
+perl -ne 'print unless m(^/node_modules/|/lib/$)' -i .gitignore
 
 : publish to GitHub
 git add .
