@@ -7,7 +7,22 @@ interface AssumeRoleParams {
   roleToAssume: string;
   roleDurationSeconds: number;
   roleSessionName: string;
+  roleSessionTagging: boolean;
   providerEndpoint: string;
+}
+
+interface AssumeRolePayload {
+  github_token: string;
+  role_to_assume: string;
+  role_session_name: string;
+  duration_seconds: number;
+  repository: string;
+  sha: string;
+  role_session_tagging: boolean;
+  action: string;
+  workflow: string;
+  actor: string;
+  branch: string;
 }
 
 interface AssumeRoleResult {
@@ -23,18 +38,19 @@ interface AssumeRoleError {
 }
 
 async function assumeRole(params: AssumeRoleParams) {
-  const {GITHUB_REPOSITORY, GITHUB_WORKFLOW, GITHUB_ACTION, GITHUB_ACTOR, GITHUB_SHA} = process.env;
-  const payload = {
+  const {GITHUB_REPOSITORY, GITHUB_WORKFLOW, GITHUB_ACTION, GITHUB_ACTOR, GITHUB_SHA, GITHUB_REF} = process.env;
+  const payload: AssumeRolePayload = {
     github_token: params.githubToken,
     role_to_assume: params.roleToAssume,
     role_session_name: params.roleSessionName,
     duration_seconds: params.roleDurationSeconds,
-    repository: GITHUB_REPOSITORY,
-    sha: GITHUB_SHA,
-    action: GITHUB_ACTION,
-    workflow: GITHUB_WORKFLOW,
-    actor: GITHUB_ACTOR,
-    branch: process.env.GITHUB_REF || ''
+    repository: GITHUB_REPOSITORY || '',
+    sha: GITHUB_SHA || '',
+    role_session_tagging: params.roleSessionTagging,
+    action: GITHUB_ACTION || '',
+    workflow: GITHUB_WORKFLOW || '',
+    actor: GITHUB_ACTOR || '',
+    branch: GITHUB_REF || ''
   };
   const client = new http.HttpClient('actions-aws-assume-role');
   const result = await client.postJson<AssumeRoleResult | AssumeRoleError>(params.providerEndpoint, payload);
@@ -76,6 +92,7 @@ async function run() {
     const roleToAssume = core.getInput('role-to-assume', required);
     const roleDurationSeconds = Number.parseInt(core.getInput('role-duration-seconds', required));
     const roleSessionName = core.getInput('role-session-name', required);
+    const roleSessionTagging = parseBoolean(core.getInput('role-session-tagging', required));
     const providerEndpoint =
       core.getInput('provider-endpoint') || 'https://uw4qs7ndjj.execute-api.us-east-1.amazonaws.com/assume-role';
     await assumeRole({
@@ -84,11 +101,37 @@ async function run() {
       roleToAssume,
       roleDurationSeconds,
       roleSessionName,
+      roleSessionTagging,
       providerEndpoint
     });
   } catch (error) {
     core.setFailed(error.message);
   }
+}
+
+function parseBoolean(s: string): boolean {
+  // YAML 1.0 compatible boolean values
+  switch (s) {
+    case 'y':
+    case 'Y':
+    case 'yes':
+    case 'Yes':
+    case 'YES':
+    case 'true':
+    case 'True':
+    case 'TRUE':
+      return true;
+    case 'n':
+    case 'N':
+    case 'no':
+    case 'No':
+    case 'NO':
+    case 'false':
+    case 'False':
+    case 'FALSE':
+      return false;
+  }
+  throw `invalid boolean value: ${s}`;
 }
 
 run();

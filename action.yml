@@ -22,6 +22,10 @@ inputs:
     description: "Role session name (default: GitHubActions)"
     default: GitHubActions
     required: true
+  role-session-tagging:
+    description: "enable session tagging"
+    default: false
+    required: true
   provider-endpoint:
     description: "URL for credential provider"
     required: false

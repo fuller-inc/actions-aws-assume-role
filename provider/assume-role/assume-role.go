@@ -60,16 +60,17 @@ func NewHandler() *Handler {
 }
 
 type requestBody struct {
-	GitHubToken     string `json:"github_token"`
-	RoleToAssume    string `json:"role_to_assume"`
-	RoleSessionName string `json:"role_session_name"`
-	DurationSeconds int32  `json:"duration_seconds"`
-	Repository      string `json:"repository"`
-	SHA             string `json:"sha"`
-	Action          string `json:"action"`
-	Workflow        string `json:"workflow"`
-	Actor           string `json:"actor"`
-	Branch          string `json:"branch"`
+	GitHubToken        string `json:"github_token"`
+	RoleToAssume       string `json:"role_to_assume"`
+	RoleSessionName    string `json:"role_session_name"`
+	DurationSeconds    int32  `json:"duration_seconds"`
+	Repository         string `json:"repository"`
+	SHA                string `json:"sha"`
+	RoleSessionTagging bool   `json:"role_session_tagging"`
+	Action             string `json:"action"`
+	Workflow           string `json:"workflow"`
+	Actor              string `json:"actor"`
+	Branch             string `json:"branch"`
 }
 
 type responseBody struct {
@@ -214,37 +215,40 @@ func (h *Handler) updateCommitStatus(ctx context.Context, req *requestBody, stat
 }
 
 func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBody, error) {
-	tags := []types.Tag{
-		{
-			Key:   aws.String("GitHub"),
-			Value: aws.String("Actions"),
-		},
-		{
-			Key:   aws.String("Repository"),
-			Value: aws.String(sanitizeTagValue(req.Repository)),
-		},
-		{
-			Key:   aws.String("Workflow"),
-			Value: aws.String(sanitizeTagValue(req.Workflow)),
-		},
-		{
-			Key:   aws.String("Action"),
-			Value: aws.String(sanitizeTagValue(req.Action)),
-		},
-		{
-			Key:   aws.String("Actor"),
-			Value: aws.String(sanitizeTagValue(req.Actor)),
-		},
-		{
-			Key:   aws.String("Commit"),
-			Value: aws.String(sanitizeTagValue(req.SHA)),
-		},
-	}
-	if req.Branch != "" {
-		tags = append(tags, types.Tag{
-			Key:   aws.String("Branch"),
-			Value: aws.String(sanitizeTagValue(req.Branch)),
-		})
+	var tags []types.Tag
+	if req.RoleSessionTagging {
+		tags = []types.Tag{
+			{
+				Key:   aws.String("GitHub"),
+				Value: aws.String("Actions"),
+			},
+			{
+				Key:   aws.String("Repository"),
+				Value: aws.String(sanitizeTagValue(req.Repository)),
+			},
+			{
+				Key:   aws.String("Workflow"),
+				Value: aws.String(sanitizeTagValue(req.Workflow)),
+			},
+			{
+				Key:   aws.String("Action"),
+				Value: aws.String(sanitizeTagValue(req.Action)),
+			},
+			{
+				Key:   aws.String("Actor"),
+				Value: aws.String(sanitizeTagValue(req.Actor)),
+			},
+			{
+				Key:   aws.String("Commit"),
+				Value: aws.String(sanitizeTagValue(req.SHA)),
+			},
+		}
+		if req.Branch != "" {
+			tags = append(tags, types.Tag{
+				Key:   aws.String("Branch"),
+				Value: aws.String(sanitizeTagValue(req.Branch)),
+			})
+		}
 	}
 
 	// validate IAM Role
