@@ -67,7 +67,7 @@ type requestBody struct {
 	Repository         string `json:"repository"`
 	SHA                string `json:"sha"`
 	RoleSessionTagging bool   `json:"role_session_tagging"`
-	Action             string `json:"action"`
+	RunID              string `json:"run_id"`
 	Workflow           string `json:"workflow"`
 	Actor              string `json:"actor"`
 	Branch             string `json:"branch"`
@@ -231,8 +231,8 @@ func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBo
 				Value: aws.String(sanitizeTagValue(req.Workflow)),
 			},
 			{
-				Key:   aws.String("Action"),
-				Value: aws.String(sanitizeTagValue(req.Action)),
+				Key:   aws.String("RunId"),
+				Value: aws.String(sanitizeTagValue(req.RunID)),
 			},
 			{
 				Key:   aws.String("Actor"),
