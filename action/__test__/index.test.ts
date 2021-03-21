@@ -27,9 +27,12 @@ describe('tests', () => {
     await exec.exec('go', ['build', '-o', bin, './cmd/dummy'], {
       cwd: '../provider/assume-role'
     });
-    // subprocess = child_process.spawn(bin);
+    subprocess = child_process.spawn(bin, [], {
+      detached: true,
+      stdio: ['ignore', 'ignore', 'ignore']
+    });
     await sleep(1); // wait for starting process
-  });
+  }, 20000);
 
   afterAll(async () => {
     subprocess?.kill('SIGTERM');
