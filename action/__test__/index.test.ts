@@ -28,8 +28,7 @@ describe('tests', () => {
       cwd: '../provider/assume-role'
     });
     subprocess = child_process.spawn(bin, [], {
-      detached: true,
-      stdio: ['ignore', 'ignore', 'ignore']
+      detached: true
     });
     await sleep(1); // wait for starting process
   }, 20000);
