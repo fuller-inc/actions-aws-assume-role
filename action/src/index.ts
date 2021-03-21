@@ -19,7 +19,7 @@ interface AssumeRolePayload {
   repository: string;
   sha: string;
   role_session_tagging: boolean;
-  action: string;
+  run_id: string;
   workflow: string;
   actor: string;
   branch: string;
@@ -44,10 +44,10 @@ function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
 }
 
 async function assumeRole(params: AssumeRoleParams) {
-  const {GITHUB_REPOSITORY, GITHUB_WORKFLOW, GITHUB_ACTION, GITHUB_ACTOR, GITHUB_SHA, GITHUB_REF} = process.env;
+  const {GITHUB_REPOSITORY, GITHUB_WORKFLOW, GITHUB_RUN_ID, GITHUB_ACTOR, GITHUB_SHA, GITHUB_REF} = process.env;
   assertIsDefined(GITHUB_REPOSITORY);
   assertIsDefined(GITHUB_WORKFLOW);
-  assertIsDefined(GITHUB_ACTION);
+  assertIsDefined(GITHUB_RUN_ID);
   assertIsDefined(GITHUB_ACTOR);
   assertIsDefined(GITHUB_SHA);
   const payload: AssumeRolePayload = {
@@ -58,7 +58,7 @@ async function assumeRole(params: AssumeRoleParams) {
     repository: GITHUB_REPOSITORY,
     sha: GITHUB_SHA,
     role_session_tagging: params.roleSessionTagging,
-    action: GITHUB_ACTION,
+    run_id: GITHUB_RUN_ID,
     workflow: GITHUB_WORKFLOW,
     actor: GITHUB_ACTOR,
     branch: GITHUB_REF || ''
