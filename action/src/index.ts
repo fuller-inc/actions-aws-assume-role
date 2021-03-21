@@ -7,6 +7,7 @@ interface AssumeRoleParams {
   roleToAssume: string;
   roleDurationSeconds: number;
   roleSessionName: string;
+  providerEndpoint: string;
 }
 
 interface AssumeRoleResult {
@@ -28,10 +29,7 @@ async function assumeRole(params: AssumeRoleParams) {
     sha: process.env['GITHUB_SHA']
   };
   const client = new http.HttpClient('actions-aws-assume-role');
-  const result = await client.postJson<AssumeRoleResult | AssumeRoleError>(
-    'https://uw4qs7ndjj.execute-api.us-east-1.amazonaws.com/assume-role',
-    payload
-  );
+  const result = await client.postJson<AssumeRoleResult | AssumeRoleError>(params.providerEndpoint, payload);
   if (result.statusCode !== 200) {
     const resp = result.result as AssumeRoleError;
     core.setFailed(resp.message);
@@ -62,12 +60,15 @@ async function run() {
     const roleToAssume = core.getInput('role-to-assume', required);
     const roleDurationSeconds = Number.parseInt(core.getInput('role-duration-seconds', required));
     const roleSessionName = core.getInput('role-session-name', required);
+    const providerEndpoint =
+      core.getInput('provider-endpoint') || 'https://uw4qs7ndjj.execute-api.us-east-1.amazonaws.com/assume-role';
     await assumeRole({
       githubToken,
       awsRegion,
       roleToAssume,
       roleDurationSeconds,
-      roleSessionName
+      roleSessionName,
+      providerEndpoint
     });
   } catch (error) {
     core.setFailed(error.message);

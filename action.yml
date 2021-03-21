@@ -22,6 +22,9 @@ inputs:
     description: "Role session name (default: GitHubActions)"
     default: GitHubActions
     required: true
+  provider-endpoint:
+    description: "URL for credential provider"
+    required: false
 runs:
   using: "node12"
   main: "action/lib/index.js"
