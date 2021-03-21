@@ -23,12 +23,18 @@ interface AssumeRoleError {
 }
 
 async function assumeRole(params: AssumeRoleParams) {
+  const {GITHUB_REPOSITORY, GITHUB_WORKFLOW, GITHUB_ACTION, GITHUB_ACTOR, GITHUB_SHA} = process.env;
   const payload = {
     github_token: params.githubToken,
     role_to_assume: params.roleToAssume,
     role_session_name: params.roleSessionName,
-    repository: process.env['GITHUB_REPOSITORY'],
-    sha: process.env['GITHUB_SHA']
+    duration_seconds: params.roleDurationSeconds,
+    repository: GITHUB_REPOSITORY,
+    sha: GITHUB_SHA,
+    action: GITHUB_ACTION,
+    workflow: GITHUB_WORKFLOW,
+    actor: GITHUB_ACTOR,
+    branch: process.env.GITHUB_REF || ''
   };
   const client = new http.HttpClient('actions-aws-assume-role');
   const result = await client.postJson<AssumeRoleResult | AssumeRoleError>(params.providerEndpoint, payload);
