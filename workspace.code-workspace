@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "provider/assume-role"
+		},
+		{
+			"path": "action"
+		}
+	],
+	"settings": {
+		"editor.formatOnSave": true
+	}
+}
