@@ -26,3 +26,23 @@ jobs:
         run: |
           make test
         working-directory: provider/assume-role
+
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12"
+
+      - name: build
+        runs: |
+          npm ci
+          npm run build
+        working-directory: action
+
+      - name: Test
+        uses: ./
