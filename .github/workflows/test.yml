@@ -48,3 +48,4 @@ jobs:
         uses: ./
         with:
           aws-region: us-east-1
+          role-to-assume: arn:aws:iam::445285296882:role/assume-role-test
