@@ -43,7 +43,7 @@ function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
   }
 }
 
-async function assumeRole(params: AssumeRoleParams) {
+export async function assumeRole(params: AssumeRoleParams) {
   const {GITHUB_REPOSITORY, GITHUB_WORKFLOW, GITHUB_RUN_ID, GITHUB_ACTOR, GITHUB_SHA, GITHUB_REF} = process.env;
   assertIsDefined(GITHUB_REPOSITORY);
   assertIsDefined(GITHUB_WORKFLOW);
@@ -145,4 +145,6 @@ function parseBoolean(s: string): boolean {
   throw `invalid boolean value: ${s}`;
 }
 
-run();
+if (require.main === module) {
+  run();
+}

@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/aws-sdk-go-v2/service/sts/types"
-	"github.com/aws/smithy-go"
 	"github.com/shogo82148/actions-aws-assume-role/provider/assume-role/github"
 )
 
@@ -42,6 +41,9 @@ func TestValidateGitHubToken(t *testing.T) {
 				}
 				if repo != "actions-aws-assume-role" {
 					t.Errorf("unexpected repo: want %q, got %q", "actions-aws-assume-role", repo)
+				}
+				if ref != "e3a45c6c16c1464826b36a598ff39e6cc98c4da4" {
+					t.Errorf("unexpected ref: want %q, got %q", "e3a45c6c16c1464826b36a598ff39e6cc98c4da4", ref)
 				}
 				if status.State != github.CommitStatePending {
 					t.Errorf("unexpected commit status state: want %s, got %s", github.CommitStatePending, status.State)
@@ -141,15 +143,6 @@ func TestAssumeRole_AssumeRolePolicyTooOpen(t *testing.T) {
 		t.Errorf("want validation error, got %T", err)
 	}
 }
-
-var errAccessDenied = &awsAccessDeniedError{}
-
-type awsAccessDeniedError struct{}
-
-func (err *awsAccessDeniedError) Error() string                 { return "AccessDenied" }
-func (err *awsAccessDeniedError) ErrorCode() string             { return "AccessDenied" }
-func (err *awsAccessDeniedError) ErrorMessage() string          { return "AccessDenied" }
-func (err *awsAccessDeniedError) ErrorFault() smithy.ErrorFault { return smithy.FaultUnknown }
 
 func TestAssumeRole(t *testing.T) {
 	h := &Handler{
