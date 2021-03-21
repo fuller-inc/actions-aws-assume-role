@@ -9,6 +9,16 @@ interface AssumeRoleParams {
   roleSessionName: string;
 }
 
+interface AssumeRoleResult {
+  access_key_id: string;
+  secret_access_key: string;
+  session_token: string;
+}
+
+interface AssumeRoleError {
+  message: string;
+}
+
 async function assumeRole(params: AssumeRoleParams) {
   const payload = {
     github_token: params.githubToken,
@@ -18,10 +28,28 @@ async function assumeRole(params: AssumeRoleParams) {
     sha: process.env['GITHUB_SHA']
   };
   const client = new http.HttpClient('actions-aws-assume-role');
-  const result = await client.postJson('https://uw4qs7ndjj.execute-api.us-east-1.amazonaws.com/assume-role', payload);
+  const result = await client.postJson<AssumeRoleResult | AssumeRoleError>(
+    'https://uw4qs7ndjj.execute-api.us-east-1.amazonaws.com/assume-role',
+    payload
+  );
   if (result.statusCode !== 200) {
-    throw new Error('unexpected status code');
+    const resp = result.result as AssumeRoleError;
+    core.setFailed(resp.message);
+    return;
   }
+  const resp = result.result as AssumeRoleResult;
+
+  core.setSecret(resp.access_key_id);
+  core.exportVariable('AWS_ACCESS_KEY_ID', resp.access_key_id);
+
+  core.setSecret(resp.secret_access_key);
+  core.exportVariable('AWS_SECRET_ACCESS_KEY', resp.secret_access_key);
+
+  core.setSecret(resp.session_token);
+  core.exportVariable('AWS_SESSION_TOKEN', resp.session_token);
+
+  core.exportVariable('AWS_DEFAULT_REGION', params.awsRegion);
+  core.exportVariable('AWS_REGION', params.awsRegion);
 }
 
 async function run() {
