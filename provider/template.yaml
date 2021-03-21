@@ -23,4 +23,5 @@ Resources:
             - Effect: Allow
               Action:
                 - sts:AssumeRole
+                - sts:TagSession
               Resource: "*"
