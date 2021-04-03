@@ -41,7 +41,7 @@ describe('tests', () => {
 
   it('succeed', async () => {
     await index.assumeRole({
-      githubToken: 'v1.dummyGitHubToken',
+      githubToken: 'ghs_dummyGitHubToken',
       awsRegion: 'us-east-1',
       roleToAssume: 'arn:aws:iam::123456789012:role/assume-role-test',
       roleDurationSeconds: 900,
