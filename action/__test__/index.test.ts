@@ -55,6 +55,20 @@ describe('tests', () => {
     expect(process.env.AWS_DEFAULT_REGION).toBe('us-east-1');
     expect(process.env.AWS_REGION).toBe('us-east-1');
   });
+
+  it('invalid GitHub Token', async () => {
+    await expect(async () => {
+      await index.assumeRole({
+        githubToken: 'ghp_dummyPersonalGitHubToken',
+        awsRegion: 'us-east-1',
+        roleToAssume: 'arn:aws:iam::123456789012:role/assume-role-test',
+        roleDurationSeconds: 900,
+        roleSessionName: 'GitHubActions',
+        roleSessionTagging: true,
+        providerEndpoint: 'http://localhost:8080'
+      });
+    }).rejects.toThrow();
+  });
 });
 
 function mkdtemp(): Promise<string> {

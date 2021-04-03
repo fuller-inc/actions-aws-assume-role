@@ -211,7 +211,7 @@ func (h *Handler) validateGitHubToken(ctx context.Context, req *requestBody) err
 	case "ghr_":
 		// GitHub App refresh tokens
 		return &validationError{
-			message: "GITHUB_TOKEN looks like GitHub App user-to-server token. `github-token` must be `${{ github.token }}` or `${{ secrets.GITHUB_TOKEN }}`.",
+			message: "GITHUB_TOKEN looks like GitHub App refresh token. `github-token` must be `${{ github.token }}` or `${{ secrets.GITHUB_TOKEN }}`.",
 		}
 	default:
 		// Old Format Personal Access Tokens
