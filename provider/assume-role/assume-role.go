@@ -182,6 +182,43 @@ func (h *Handler) handleError(w http.ResponseWriter, r *http.Request, err error)
 }
 
 func (h *Handler) validateGitHubToken(ctx context.Context, req *requestBody) error {
+	// early check of the token prefix
+	// ref. https://github.blog/changelog/2021-03-31-authentication-token-format-updates-are-generally-available/
+	if len(req.GitHubToken) < 4 {
+		return &validationError{
+			message: "GITHUB_TOKEN has invalid format",
+		}
+	}
+	switch req.GitHubToken[:4] {
+	case "ghp_":
+		// Personal Access Tokens
+		return &validationError{
+			message: "GITHUB_TOKEN looks like Personal Access Token. It must be a GitHub App server-to-server token.",
+		}
+	case "gho_":
+		// OAuth Access tokens
+		return &validationError{
+			message: "GITHUB_TOKEN looks like OAuth Access token. It must be a GitHub App server-to-server token.",
+		}
+	case "ghu_":
+		// GitHub App user-to-server tokens
+		return &validationError{
+			message: "GITHUB_TOKEN looks like GitHub App user-to-server token. It must be a GitHub App server-to-server token.",
+		}
+	case "ghs_":
+		// GitHub App server-to-server tokens
+		// It's OK
+	case "ghr_":
+		// GitHub App refresh tokens
+		return &validationError{
+			message: "GITHUB_TOKEN looks like GitHub App user-to-server token. It must be a GitHub App server-to-server token.",
+		}
+	default:
+		// Old Format Personal Access Tokens
+		return &validationError{
+			message: "GITHUB_TOKEN looks like Personal Access Token. It must be a GitHub App server-to-server token.",
+		}
+	}
 	resp, err := h.updateCommitStatus(ctx, req, &github.CreateStatusRequest{
 		State:       github.CommitStatePending,
 		Description: "configuring AWS credentials",
