@@ -11,6 +11,7 @@ Resources:
       CodeUri: assume-role/
       Handler: assume-role
       Runtime: provided.al2
+      Tracing: Active
       Events:
         CatchAll:
           Type: HttpApi

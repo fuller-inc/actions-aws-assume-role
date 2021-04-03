@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -18,6 +19,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 	"github.com/aws/smithy-go"
 	"github.com/shogo82148/actions-aws-assume-role/provider/assume-role/github"
+	"github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2"
+	"github.com/shogo82148/aws-xray-yasdk-go/xrayhttp"
 )
 
 const (
@@ -49,12 +52,18 @@ type Handler struct {
 }
 
 func NewHandler() *Handler {
-	cfg, err := config.LoadDefaultConfig(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	cfg, err := config.LoadDefaultConfig(ctx, xrayaws.WithXRay())
 	if err != nil {
 		log.Fatalf("unable to load SDK config, %v", err)
 	}
+
+	client := xrayhttp.Client(nil)
+
 	return &Handler{
-		github: github.NewClient(nil),
+		github: github.NewClient(client),
 		sts:    sts.NewFromConfig(cfg),
 	}
 }
