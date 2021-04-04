@@ -22,6 +22,29 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.assumeRole = void 0;
 const core = __importStar(require("@actions/core"));
 const http = __importStar(require("@actions/http-client"));
+function validateGitHubToken(token) {
+    if (token.length < 4) {
+        throw new Error('GITHUB_TOKEN has invalid format');
+    }
+    switch (token.substring(0, 4)) {
+        case 'ghp_':
+            // Personal Access Tokens
+            throw new Error('GITHUB_TOKEN looks like Personal Access Token. `github-token` must be `${{ github.token }}` or `${{ secrets.GITHUB_TOKEN }}`.');
+        case 'gho_':
+            // OAuth Access tokens
+            throw new Error('GITHUB_TOKEN looks like OAuth Access token. `github-token` must be `${{ github.token }}` or `${{ secrets.GITHUB_TOKEN }}`.');
+        case 'ghu_':
+            // GitHub App user-to-server tokens
+            throw new Error('GITHUB_TOKEN looks like GitHub App user-to-server token. `github-token` must be `${{ github.token }}` or `${{ secrets.GITHUB_TOKEN }}`.');
+        case 'ghs_':
+            // GitHub App server-to-server tokens
+            return; // it's OK
+        case 'ghr_':
+            throw new Error('GITHUB_TOKEN looks like GitHub App refresh token. `github-token` must be `${{ github.token }}` or `${{ secrets.GITHUB_TOKEN }}`.');
+    }
+    // maybe Old Format Personal Access Tokens
+    throw new Error('GITHUB_TOKEN looks like Personal Access Token. `github-token` must be `${{ github.token }}` or `${{ secrets.GITHUB_TOKEN }}`.');
+}
 function assertIsDefined(val) {
     if (val === undefined || val === null) {
         throw new Error(`Missing required environment value. Are you running in GitHub Actions?`);
@@ -34,6 +57,7 @@ async function assumeRole(params) {
     assertIsDefined(GITHUB_RUN_ID);
     assertIsDefined(GITHUB_ACTOR);
     assertIsDefined(GITHUB_SHA);
+    validateGitHubToken(params.githubToken);
     const payload = {
         github_token: params.githubToken,
         role_to_assume: params.roleToAssume,
