@@ -33,8 +33,8 @@ func TestValidateGitHubToken(t *testing.T) {
 	h := &Handler{
 		github: &githubClientMock{
 			CreateStatusFunc: func(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error) {
-				if token != "v1.dummyGitHubToken" {
-					t.Errorf("unexpected GitHub Token: want %q, got %q", "v1.dummyGitHubToken", token)
+				if token != "ghs_dummyGitHubToken" {
+					t.Errorf("unexpected GitHub Token: want %q, got %q", "ghs_dummyGitHubToken", token)
 				}
 				if owner != "shogo82148" {
 					t.Errorf("unexpected owner: want %q, got %q", "shogo82148", owner)
@@ -62,7 +62,7 @@ func TestValidateGitHubToken(t *testing.T) {
 		},
 	}
 	err := h.validateGitHubToken(context.Background(), &requestBody{
-		GitHubToken: "v1.dummyGitHubToken",
+		GitHubToken: "ghs_dummyGitHubToken",
 		Repository:  "shogo82148/actions-aws-assume-role",
 		SHA:         "e3a45c6c16c1464826b36a598ff39e6cc98c4da4",
 	})
@@ -82,7 +82,7 @@ func TestValidateGitHubToken_PermissionError(t *testing.T) {
 		},
 	}
 	err := h.validateGitHubToken(context.Background(), &requestBody{
-		GitHubToken: "v1.dummyGitHubToken",
+		GitHubToken: "ghs_dummyGitHubToken",
 		Repository:  "shogo82148/actions-aws-assume-role",
 		SHA:         "e3a45c6c16c1464826b36a598ff39e6cc98c4da4",
 	})
@@ -111,7 +111,7 @@ func TestValidateGitHubToken_InvalidCreator(t *testing.T) {
 		},
 	}
 	err := h.validateGitHubToken(context.Background(), &requestBody{
-		GitHubToken: "v1.dummyGitHubToken",
+		GitHubToken: "ghs_dummyGitHubToken",
 		Repository:  "shogo82148/actions-aws-assume-role",
 		SHA:         "e3a45c6c16c1464826b36a598ff39e6cc98c4da4",
 	})
