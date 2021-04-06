@@ -1,16 +1,23 @@
 {
 	"folders": [
 		{
-			"path": "."
+			"path": ".",
+			"name": "actions-aws-assume-role"
 		},
 		{
-			"path": "provider/assume-role"
+			"path": "provider/assume-role",
+			"name": "assume-role"
 		},
 		{
-			"path": "action"
+			"path": "action",
+			"name": "action"
 		}
 	],
 	"settings": {
-		"editor.formatOnSave": true
+		"editor.formatOnSave": true,
+		"files.exclude": {
+			"provider/assume-role": true,
+			"action": true
+		}
 	}
 }

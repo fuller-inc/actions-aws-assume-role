@@ -45,8 +45,8 @@ func TestValidateGitHubToken(t *testing.T) {
 				if ref != "e3a45c6c16c1464826b36a598ff39e6cc98c4da4" {
 					t.Errorf("unexpected ref: want %q, got %q", "e3a45c6c16c1464826b36a598ff39e6cc98c4da4", ref)
 				}
-				if status.State != github.CommitStatePending {
-					t.Errorf("unexpected commit status state: want %s, got %s", github.CommitStatePending, status.State)
+				if status.State != github.CommitStateSuccess {
+					t.Errorf("unexpected commit status state: want %s, got %s", github.CommitStateSuccess, status.State)
 				}
 				if status.Context != commitStatusContext {
 					t.Errorf("unexpected commit status context: want %q, got %q", commitStatusContext, status.Context)
