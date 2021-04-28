@@ -6,6 +6,7 @@ on:
 jobs:
   provider:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -31,6 +32,7 @@ jobs:
 
   action:
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
