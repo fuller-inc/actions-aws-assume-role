@@ -142,7 +142,7 @@ async function run() {
     const roleToAssume = core.getInput('role-to-assume', required);
     const roleDurationSeconds = Number.parseInt(core.getInput('role-duration-seconds', required));
     const roleSessionName = core.getInput('role-session-name', required);
-    const roleSessionTagging = parseBoolean(core.getInput('role-session-tagging', required));
+    const roleSessionTagging = core.getBooleanInput('role-session-tagging', required);
     const providerEndpoint =
       core.getInput('provider-endpoint') || 'https://uw4qs7ndjj.execute-api.us-east-1.amazonaws.com/assume-role';
     await assumeRole({
@@ -157,31 +157,6 @@ async function run() {
   } catch (error) {
     core.setFailed(error.message);
   }
-}
-
-function parseBoolean(s: string): boolean {
-  // YAML 1.0 compatible boolean values
-  switch (s) {
-    case 'y':
-    case 'Y':
-    case 'yes':
-    case 'Yes':
-    case 'YES':
-    case 'true':
-    case 'True':
-    case 'TRUE':
-      return true;
-    case 'n':
-    case 'N':
-    case 'no':
-    case 'No':
-    case 'NO':
-    case 'false':
-    case 'False':
-    case 'FALSE':
-      return false;
-  }
-  throw `invalid boolean value: ${s}`;
 }
 
 if (require.main === module) {
