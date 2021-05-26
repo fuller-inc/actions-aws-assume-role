@@ -18,7 +18,7 @@ process.env.GITHUB_ACTOR = 'shogo82148';
 process.env.GITHUB_SHA = 'e3a45c6c16c1464826b36a598ff39e6cc98c4da4';
 process.env.GITHUB_REF = 'ref/heads/main';
 
-describe('tests', async () => {
+describe('tests', () => {
   let tmpdir = '';
   let subprocess: child_process.ChildProcess;
   beforeAll(async () => {
