@@ -18,7 +18,7 @@
     "@actions/exec": "^1.0.4",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.6.1",
-    "jest": "^27.0.1",
+    "jest": "^27.0.3",
     "jest-circus": "^27.0.1",
     "prettier": "^2.3.0",
     "ts-jest": "^27.0.1",
