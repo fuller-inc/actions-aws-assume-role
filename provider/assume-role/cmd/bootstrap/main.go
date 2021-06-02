@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	assumerole "github.com/fuller-inc/actions-aws-assume-role/provider/assume-role"
-	"github.com/fuller-inc/ridgenative"
+	"github.com/shogo82148/ridgenative"
 )
 
 func main() {
