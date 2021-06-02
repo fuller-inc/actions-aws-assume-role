@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 	"github.com/aws/smithy-go"
-	"github.com/shogo82148/actions-aws-assume-role/provider/assume-role/github"
+	"github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/github"
 )
 
 var errAccessDenied = &awsAccessDeniedError{}

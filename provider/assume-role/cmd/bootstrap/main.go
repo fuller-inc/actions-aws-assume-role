@@ -3,8 +3,8 @@ package main
 import (
 	"net/http"
 
-	assumerole "github.com/shogo82148/actions-aws-assume-role/provider/assume-role"
-	"github.com/shogo82148/ridgenative"
+	assumerole "github.com/fuller-inc/actions-aws-assume-role/provider/assume-role"
+	"github.com/fuller-inc/ridgenative"
 )
 
 func main() {
