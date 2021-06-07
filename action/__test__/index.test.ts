@@ -25,12 +25,12 @@ describe('tests', () => {
     tmpdir = await mkdtemp();
     const bin = `${tmpdir}${sep}dummy${binExt}`;
 
-    console.log("compiling dummy server");
+    console.log('compiling dummy server');
     await exec.exec('go', ['build', '-o', bin, './cmd/dummy'], {
       cwd: `..${sep}provider${sep}assume-role`
     });
 
-    console.log("starting dummy server");
+    console.log('starting dummy server');
     subprocess = child_process.spawn(bin, [], {
       detached: true,
       stdio: 'ignore'
@@ -39,7 +39,7 @@ describe('tests', () => {
   }, 60000);
 
   afterAll(async () => {
-    console.log("killing dummy server");
+    console.log('killing dummy server');
     subprocess?.kill('SIGTERM');
     await sleep(1); // wait for stopping process
     await io.rmRF(tmpdir);
