@@ -26,9 +26,13 @@ describe('tests', () => {
     const bin = `${tmpdir}${sep}dummy${binExt}`;
 
     console.log('compiling dummy server');
-    await exec.exec('go', ['build', '-o', bin, './cmd/dummy'], {
-      cwd: `..${sep}provider${sep}assume-role`
-    });
+    await exec.exec(
+      'go',
+      ['build', '-o', bin, 'github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/cmd/dummy'],
+      {
+        cwd: `..${sep}provider${sep}assume-role`
+      }
+    );
 
     console.log('starting dummy server');
     subprocess = child_process.spawn(bin, [], {
