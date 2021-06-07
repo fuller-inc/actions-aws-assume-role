@@ -40,7 +40,7 @@ describe('tests', () => {
       stdio: 'ignore'
     });
     await sleep(1); // wait for starting process
-  }, 60000);
+  }, 5 * 60000);
 
   afterAll(async () => {
     console.log('killing dummy server');
