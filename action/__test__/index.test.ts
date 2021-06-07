@@ -24,10 +24,29 @@ describe('tests', () => {
   beforeAll(async () => {
     tmpdir = await mkdtemp();
     const bin = `${tmpdir}${sep}dummy${binExt}`;
+
     console.log("compiling dummy server");
-    await exec.exec('go', ['build', '-o', bin, './cmd/dummy'], {
-      cwd: '../provider/assume-role'
-    });
+    let myOutput = '';
+    let myError = '';
+    try {
+      await exec.exec('go', ['build', '-o', bin, './cmd/dummy'], {
+        cwd: '../provider/assume-role',
+        listeners: {
+          stdout: (data: Buffer) => {
+            myOutput += data.toString();
+          },
+          stderr: (data: Buffer) => {
+            myError += data.toString();
+          }
+        }
+      });
+    } catch (e) {
+      console.log(`error: ${e}`);
+      console.log(`stdout: ${myOutput}`);
+      console.log(`stderr: ${myError}`);
+      throw e;
+    }
+
     console.log("starting dummy server");
     subprocess = child_process.spawn(bin, [], {
       detached: true,
@@ -88,7 +107,7 @@ function mkdtemp(): Promise<string> {
   });
 }
 
-function sleep(waitSec: number) {
+function sleep(waitSec: number): Promise<void> {
   return new Promise<void>(function (resolve) {
     setTimeout(() => resolve(), waitSec * 1000);
   });
