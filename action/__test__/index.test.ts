@@ -26,26 +26,9 @@ describe('tests', () => {
     const bin = `${tmpdir}${sep}dummy${binExt}`;
 
     console.log("compiling dummy server");
-    let myOutput = '';
-    let myError = '';
-    try {
-      await exec.exec('go', ['build', '-o', bin, './cmd/dummy'], {
-        cwd: '../provider/assume-role',
-        listeners: {
-          stdout: (data: Buffer) => {
-            myOutput += data.toString();
-          },
-          stderr: (data: Buffer) => {
-            myError += data.toString();
-          }
-        }
-      });
-    } catch (e) {
-      console.log(`error: ${e}`);
-      console.log(`stdout: ${myOutput}`);
-      console.log(`stderr: ${myError}`);
-      throw e;
-    }
+    await exec.exec('go', ['build', '-o', bin, './cmd/dummy'], {
+      cwd: `..${sep}provider${sep}assume-role`
+    });
 
     console.log("starting dummy server");
     subprocess = child_process.spawn(bin, [], {
