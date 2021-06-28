@@ -17,7 +17,7 @@
   "devDependencies": {
     "@actions/exec": "^1.1.0",
     "@types/jest": "^26.0.23",
-    "@types/node": "^15.12.4",
+    "@types/node": "^15.12.5",
     "jest": "^27.0.5",
     "jest-circus": "^27.0.5",
     "prettier": "^2.3.2",
