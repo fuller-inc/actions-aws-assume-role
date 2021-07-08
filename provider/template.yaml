@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: credential provider for actions-aws-assume-role
 
+Parameters:
+  ApiUrl:
+    Type: String
+    Default: https://api.github.com
+    Description: The URL for GitHub API. You might need to configure it if you use GitHub Enterprise Server.
+
 Resources:
   ProviderFunction:
     Type: AWS::Serverless::Function
@@ -26,3 +32,6 @@ Resources:
                 - sts:AssumeRole
                 - sts:TagSession
               Resource: "*"
+      Environment:
+        Variables:
+          GITHUB_API_URL: !Ref ApiUrl

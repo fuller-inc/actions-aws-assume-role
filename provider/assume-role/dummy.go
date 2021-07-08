@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 	"github.com/aws/smithy-go"
-	"github.com/shogo82148/actions-aws-assume-role/provider/assume-role/github"
+	"github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/github"
 )
 
 var errAccessDenied = &awsAccessDeniedError{}
@@ -33,6 +33,10 @@ func (c *githubClientDummy) CreateStatus(ctx context.Context, token, owner, repo
 			Type:  "Bot",
 		},
 	}, nil
+}
+
+func (c *githubClientDummy) ValidateAPIURL(url string) error {
+	return nil
 }
 
 type stsClientDummy struct{}

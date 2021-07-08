@@ -24,16 +24,26 @@ describe('tests', () => {
   beforeAll(async () => {
     tmpdir = await mkdtemp();
     const bin = `${tmpdir}${sep}dummy${binExt}`;
-    await exec.exec('go', ['build', '-o', bin, './cmd/dummy'], {
-      cwd: '../provider/assume-role'
-    });
+
+    console.log('compiling dummy server');
+    await exec.exec(
+      'go',
+      ['build', '-o', bin, 'github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/cmd/dummy'],
+      {
+        cwd: `..${sep}provider${sep}assume-role`
+      }
+    );
+
+    console.log('starting dummy server');
     subprocess = child_process.spawn(bin, [], {
-      detached: true
+      detached: true,
+      stdio: 'ignore'
     });
     await sleep(1); // wait for starting process
-  }, 60000);
+  }, 5 * 60000);
 
   afterAll(async () => {
+    console.log('killing dummy server');
     subprocess?.kill('SIGTERM');
     await sleep(1); // wait for stopping process
     await io.rmRF(tmpdir);
@@ -47,7 +57,8 @@ describe('tests', () => {
       roleDurationSeconds: 900,
       roleSessionName: 'GitHubActions',
       roleSessionTagging: true,
-      providerEndpoint: 'http://localhost:8080'
+      providerEndpoint: 'http://localhost:8080',
+      obfuscateRepository: ''
     });
     expect(process.env.AWS_ACCESS_KEY_ID).toBe('AKIAIOSFODNN7EXAMPLE');
     expect(process.env.AWS_SECRET_ACCESS_KEY).toBe('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
@@ -65,7 +76,8 @@ describe('tests', () => {
         roleDurationSeconds: 900,
         roleSessionName: 'GitHubActions',
         roleSessionTagging: true,
-        providerEndpoint: 'http://localhost:8080'
+        providerEndpoint: 'http://localhost:8080',
+        obfuscateRepository: ''
       });
     }).rejects.toThrow();
   });
@@ -84,7 +96,7 @@ function mkdtemp(): Promise<string> {
   });
 }
 
-function sleep(waitSec: number) {
+function sleep(waitSec: number): Promise<void> {
   return new Promise<void>(function (resolve) {
     setTimeout(() => resolve(), waitSec * 1000);
   });

@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	assumerole "github.com/shogo82148/actions-aws-assume-role/provider/assume-role"
+	assumerole "github.com/fuller-inc/actions-aws-assume-role/provider/assume-role"
 )
 
 func main() {
