@@ -58,12 +58,15 @@ async function assumeRole(params) {
     assertIsDefined(GITHUB_ACTOR);
     assertIsDefined(GITHUB_SHA);
     validateGitHubToken(params.githubToken);
+    const GITHUB_API_URL = process.env['GITHUB_API_URL'] || 'https://api.github.com';
     const payload = {
         github_token: params.githubToken,
         role_to_assume: params.roleToAssume,
         role_session_name: params.roleSessionName,
         duration_seconds: params.roleDurationSeconds,
+        api_url: GITHUB_API_URL,
         repository: GITHUB_REPOSITORY,
+        obfuscate_repository: params.obfuscateRepository,
         sha: GITHUB_SHA,
         role_session_tagging: params.roleSessionTagging,
         run_id: GITHUB_RUN_ID,
@@ -105,8 +108,9 @@ async function run() {
         const roleToAssume = core.getInput('role-to-assume', required);
         const roleDurationSeconds = Number.parseInt(core.getInput('role-duration-seconds', required));
         const roleSessionName = core.getInput('role-session-name', required);
-        const roleSessionTagging = parseBoolean(core.getInput('role-session-tagging', required));
+        const roleSessionTagging = core.getBooleanInput('role-session-tagging', required);
         const providerEndpoint = core.getInput('provider-endpoint') || 'https://uw4qs7ndjj.execute-api.us-east-1.amazonaws.com/assume-role';
+        const obfuscateRepository = core.getInput('obfuscate-repository', required);
         await assumeRole({
             githubToken,
             awsRegion,
@@ -114,36 +118,13 @@ async function run() {
             roleDurationSeconds,
             roleSessionName,
             roleSessionTagging,
-            providerEndpoint
+            providerEndpoint,
+            obfuscateRepository
         });
     }
     catch (error) {
         core.setFailed(error.message);
     }
-}
-function parseBoolean(s) {
-    // YAML 1.0 compatible boolean values
-    switch (s) {
-        case 'y':
-        case 'Y':
-        case 'yes':
-        case 'Yes':
-        case 'YES':
-        case 'true':
-        case 'True':
-        case 'TRUE':
-            return true;
-        case 'n':
-        case 'N':
-        case 'no':
-        case 'No':
-        case 'NO':
-        case 'false':
-        case 'False':
-        case 'FALSE':
-            return false;
-    }
-    throw `invalid boolean value: ${s}`;
 }
 if (require.main === module) {
     run();
