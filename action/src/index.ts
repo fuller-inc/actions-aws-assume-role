@@ -156,7 +156,7 @@ async function run() {
     const providerEndpoint =
       core.getInput('provider-endpoint') || 'https://uw4qs7ndjj.execute-api.us-east-1.amazonaws.com/assume-role';
     const useNodeId = core.getBooleanInput('use-node-id', required);
-    const obfuscateRepository = core.getInput('obfuscate-repository', required);
+    const obfuscateRepository = core.getInput('obfuscate-repository');
     await assumeRole({
       githubToken,
       awsRegion,
