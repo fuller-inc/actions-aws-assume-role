@@ -223,7 +223,7 @@ func TestAssumeRole_ObfuscateRepository(t *testing.T) {
 		RoleToAssume:        "arn:aws:iam::123456789012:role/assume-role-test",
 		RoleSessionName:     "GitHubActions",
 		Repository:          "fuller-inc/actions-aws-assume-role",
-		ObfuscateRepository: true,
+		ObfuscateRepository: "sha256",
 	})
 	if err != nil {
 		t.Fatal(err)

@@ -9,7 +9,7 @@ interface AssumeRoleParams {
   roleSessionName: string;
   roleSessionTagging: boolean;
   providerEndpoint: string;
-  obfuscateRepository: boolean;
+  obfuscateRepository: string;
 }
 
 interface AssumeRolePayload {
@@ -19,7 +19,7 @@ interface AssumeRolePayload {
   duration_seconds: number;
   api_url: string;
   repository: string;
-  obfuscate_repository: boolean;
+  obfuscate_repository: string;
   sha: string;
   role_session_tagging: boolean;
   run_id: string;
@@ -152,7 +152,7 @@ async function run() {
     const roleSessionTagging = core.getBooleanInput('role-session-tagging', required);
     const providerEndpoint =
       core.getInput('provider-endpoint') || 'https://uw4qs7ndjj.execute-api.us-east-1.amazonaws.com/assume-role';
-    const obfuscateRepository = core.getBooleanInput('obfuscate-repository', required);
+    const obfuscateRepository = core.getInput('obfuscate-repository', required);
     await assumeRole({
       githubToken,
       awsRegion,
