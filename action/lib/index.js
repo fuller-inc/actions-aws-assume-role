@@ -66,7 +66,7 @@ async function assumeRole(params) {
         duration_seconds: params.roleDurationSeconds,
         api_url: GITHUB_API_URL,
         repository: GITHUB_REPOSITORY,
-        useNodeId: params.useNodeId,
+        use_node_id: params.useNodeId,
         obfuscate_repository: params.obfuscateRepository,
         sha: GITHUB_SHA,
         role_session_tagging: params.roleSessionTagging,
