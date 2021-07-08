@@ -41,8 +41,8 @@ func TestValidateGitHubToken(t *testing.T) {
 				if token != "ghs_dummyGitHubToken" {
 					t.Errorf("unexpected GitHub Token: want %q, got %q", "ghs_dummyGitHubToken", token)
 				}
-				if owner != "shogo82148" {
-					t.Errorf("unexpected owner: want %q, got %q", "shogo82148", owner)
+				if owner != "fuller-inc" {
+					t.Errorf("unexpected owner: want %q, got %q", "fuller-inc", owner)
 				}
 				if repo != "actions-aws-assume-role" {
 					t.Errorf("unexpected repo: want %q, got %q", "actions-aws-assume-role", repo)
