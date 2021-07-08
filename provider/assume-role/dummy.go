@@ -35,6 +35,10 @@ func (c *githubClientDummy) CreateStatus(ctx context.Context, token, owner, repo
 	}, nil
 }
 
+func (c *githubClientDummy) ValidateAPIURL(url string) error {
+	return nil
+}
+
 type stsClientDummy struct{}
 
 func (c *stsClientDummy) AssumeRole(ctx context.Context, params *sts.AssumeRoleInput, optFns ...func(*sts.Options)) (*sts.AssumeRoleOutput, error) {

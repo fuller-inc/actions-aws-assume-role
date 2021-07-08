@@ -16,6 +16,7 @@ interface AssumeRolePayload {
   role_to_assume: string;
   role_session_name: string;
   duration_seconds: number;
+  api_url: string;
   repository: string;
   sha: string;
   role_session_tagging: boolean;
@@ -89,11 +90,14 @@ export async function assumeRole(params: AssumeRoleParams) {
   assertIsDefined(GITHUB_ACTOR);
   assertIsDefined(GITHUB_SHA);
   validateGitHubToken(params.githubToken);
+  const GITHUB_API_URL = process.env['GITHUB_API_URL'] || 'https://api.github.com';
+
   const payload: AssumeRolePayload = {
     github_token: params.githubToken,
     role_to_assume: params.roleToAssume,
     role_session_name: params.roleSessionName,
     duration_seconds: params.roleDurationSeconds,
+    api_url: GITHUB_API_URL,
     repository: GITHUB_REPOSITORY,
     sha: GITHUB_SHA,
     role_session_tagging: params.roleSessionTagging,

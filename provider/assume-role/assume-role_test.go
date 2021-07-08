@@ -14,11 +14,16 @@ import (
 )
 
 type githubClientMock struct {
-	CreateStatusFunc func(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error)
+	CreateStatusFunc   func(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error)
+	ValidateAPIURLFunc func(url string) error
 }
 
 func (c *githubClientMock) CreateStatus(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error) {
 	return c.CreateStatusFunc(ctx, token, owner, repo, ref, status)
+}
+
+func (c *githubClientMock) ValidateAPIURL(url string) error {
+	return c.ValidateAPIURLFunc(url)
 }
 
 type stsClientMock struct {
@@ -59,6 +64,9 @@ func TestValidateGitHubToken(t *testing.T) {
 					},
 				}, nil
 			},
+			ValidateAPIURLFunc: func(url string) error {
+				return nil
+			},
 		},
 	}
 	err := h.validateGitHubToken(context.Background(), &requestBody{
@@ -78,6 +86,9 @@ func TestValidateGitHubToken_PermissionError(t *testing.T) {
 				return nil, &github.UnexpectedStatusCodeError{
 					StatusCode: http.StatusBadRequest,
 				}
+			},
+			ValidateAPIURLFunc: func(url string) error {
+				return nil
 			},
 		},
 	}
@@ -107,6 +118,9 @@ func TestValidateGitHubToken_InvalidCreator(t *testing.T) {
 						Type:  "User",
 					},
 				}, nil
+			},
+			ValidateAPIURLFunc: func(url string) error {
+				return nil
 			},
 		},
 	}
