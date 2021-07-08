@@ -146,7 +146,7 @@ func (c *Client) GetRepo(ctx context.Context, token, owner, repo string) (*GetRe
 	defer resp.Body.Close()
 
 	// parse the response
-	if resp.StatusCode != http.StatusCreated {
+	if resp.StatusCode != http.StatusOK {
 		return nil, &UnexpectedStatusCodeError{StatusCode: resp.StatusCode}
 	}
 
