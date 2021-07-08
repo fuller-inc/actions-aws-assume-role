@@ -312,7 +312,7 @@ func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBo
 	input := *validationInput
 	if req.ObfuscateRepository {
 		hash := sha256.Sum256([]byte(req.Repository))
-		input.ExternalId = aws.String(hex.EncodeToString(hash[:]))
+		input.ExternalId = aws.String("sha256:" + hex.EncodeToString(hash[:]))
 	} else {
 		input.ExternalId = aws.String(req.Repository)
 	}
