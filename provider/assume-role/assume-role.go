@@ -34,6 +34,7 @@ const (
 
 type githubClient interface {
 	CreateStatus(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error)
+	GetRepo(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error)
 	ValidateAPIURL(url string) error
 }
 
@@ -77,6 +78,7 @@ type requestBody struct {
 	RoleSessionName     string `json:"role_session_name"`
 	DurationSeconds     int32  `json:"duration_seconds"`
 	Repository          string `json:"repository"`
+	UseNodeID           bool   `json:"use_node_id"`
 	ObfuscateRepository string `json:"obfuscate_repository"`
 	APIURL              string `json:"api_url"`
 	SHA                 string `json:"sha"`
@@ -233,16 +235,33 @@ func (h *Handler) validateGitHubToken(ctx context.Context, req *requestBody) err
 	return nil
 }
 
-func (h *Handler) updateCommitStatus(ctx context.Context, req *requestBody, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error) {
-	idx := strings.IndexByte(req.Repository, '/')
+func splitOwnerRepo(fullname string) (owner, repo string, err error) {
+	idx := strings.IndexByte(fullname, '/')
 	if idx < 0 {
-		return nil, &validationError{
-			message: fmt.Sprintf("invalid repository name: %s", req.Repository),
+		err = &validationError{
+			message: fmt.Sprintf("invalid repository name: %s", fullname),
 		}
+		return
 	}
-	owner := req.Repository[:idx]
-	repo := req.Repository[idx+1:]
+	owner = fullname[:idx]
+	repo = fullname[idx+1:]
+	return
+}
+
+func (h *Handler) updateCommitStatus(ctx context.Context, req *requestBody, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error) {
+	owner, repo, err := splitOwnerRepo(req.Repository)
+	if err != nil {
+		return nil, err
+	}
 	return h.github.CreateStatus(ctx, req.GitHubToken, owner, repo, req.SHA, status)
+}
+
+func (h *Handler) getRepo(ctx context.Context, req *requestBody) (*github.GetRepoResponse, error) {
+	owner, repo, err := splitOwnerRepo(req.Repository)
+	if err != nil {
+		return nil, err
+	}
+	return h.github.GetRepo(ctx, req.GitHubToken, owner, repo)
 }
 
 func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBody, error) {
@@ -310,14 +329,22 @@ func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBo
 
 	// assume role with the correct external ID
 	input := *validationInput
-	switch req.ObfuscateRepository {
-	case "sha256":
-		hash := sha256.Sum256([]byte(req.Repository))
-		input.ExternalId = aws.String("sha256:" + hex.EncodeToString(hash[:]))
-	case "":
-		input.ExternalId = aws.String(req.Repository)
-	default:
-		return nil, fmt.Errorf("invalid obfuscate repository type: %s", req.ObfuscateRepository)
+	if req.UseNodeID {
+		repo, err := h.getRepo(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+		input.ExternalId = aws.String(repo.NodeID)
+	} else {
+		switch req.ObfuscateRepository {
+		case "sha256":
+			hash := sha256.Sum256([]byte(req.Repository))
+			input.ExternalId = aws.String("sha256:" + hex.EncodeToString(hash[:]))
+		case "":
+			input.ExternalId = aws.String(req.Repository)
+		default:
+			return nil, fmt.Errorf("invalid obfuscate repository type: %s", req.ObfuscateRepository)
+		}
 	}
 	input.DurationSeconds = aws.Int32(req.DurationSeconds)
 	resp, err := h.sts.AssumeRole(ctx, &input)

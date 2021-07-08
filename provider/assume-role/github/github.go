@@ -85,6 +85,12 @@ type CreateStatusResponseCreator struct {
 	// omit other fields, we don't use them.
 }
 
+type GetRepoResponse struct {
+	NodeID string `json:"node_id"`
+
+	// omit other fields, we don't use them.
+}
+
 // CreateStatus creates a commit status.
 // https://docs.github.com/en/rest/reference/repos#create-a-commit-status
 func (c *Client) CreateStatus(ctx context.Context, token, owner, repo, ref string, status *CreateStatusRequest) (*CreateStatusResponse, error) {
@@ -115,6 +121,36 @@ func (c *Client) CreateStatus(ctx context.Context, token, owner, repo, ref strin
 	}
 
 	var ret *CreateStatusResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+func (c *Client) GetRepo(ctx context.Context, token, owner, repo string) (*GetRepoResponse, error) {
+	// build the request
+	u := fmt.Sprintf("%s/repos/%s/%s", c.baseURL, owner, repo)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/vnd.github.v3+json")
+	req.Header.Set("User-Agent", githubUserAgent)
+	req.Header.Set("Authorization", "token "+token)
+
+	// send the request
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// parse the response
+	if resp.StatusCode != http.StatusCreated {
+		return nil, &UnexpectedStatusCodeError{StatusCode: resp.StatusCode}
+	}
+
+	var ret *GetRepoResponse
 	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
