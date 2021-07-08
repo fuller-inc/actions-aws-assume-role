@@ -20,7 +20,7 @@ interface AssumeRolePayload {
   duration_seconds: number;
   api_url: string;
   repository: string;
-  useNodeId: boolean;
+  use_node_id: boolean;
   obfuscate_repository: string;
   sha: string;
   role_session_tagging: boolean;
@@ -103,7 +103,7 @@ export async function assumeRole(params: AssumeRoleParams) {
     duration_seconds: params.roleDurationSeconds,
     api_url: GITHUB_API_URL,
     repository: GITHUB_REPOSITORY,
-    useNodeId: params.useNodeId,
+    use_node_id: params.useNodeId,
     obfuscate_repository: params.obfuscateRepository,
     sha: GITHUB_SHA,
     role_session_tagging: params.roleSessionTagging,
