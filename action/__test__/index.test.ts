@@ -57,7 +57,8 @@ describe('tests', () => {
       roleDurationSeconds: 900,
       roleSessionName: 'GitHubActions',
       roleSessionTagging: true,
-      providerEndpoint: 'http://localhost:8080'
+      providerEndpoint: 'http://localhost:8080',
+      obfuscateRepository: false
     });
     expect(process.env.AWS_ACCESS_KEY_ID).toBe('AKIAIOSFODNN7EXAMPLE');
     expect(process.env.AWS_SECRET_ACCESS_KEY).toBe('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
@@ -75,7 +76,8 @@ describe('tests', () => {
         roleDurationSeconds: 900,
         roleSessionName: 'GitHubActions',
         roleSessionTagging: true,
-        providerEndpoint: 'http://localhost:8080'
+        providerEndpoint: 'http://localhost:8080',
+        obfuscateRepository: false
       });
     }).rejects.toThrow();
   });

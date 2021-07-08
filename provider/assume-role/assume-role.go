@@ -2,6 +2,8 @@ package assumerole
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -70,18 +72,19 @@ func NewHandler() *Handler {
 }
 
 type requestBody struct {
-	GitHubToken        string `json:"github_token"`
-	RoleToAssume       string `json:"role_to_assume"`
-	RoleSessionName    string `json:"role_session_name"`
-	DurationSeconds    int32  `json:"duration_seconds"`
-	Repository         string `json:"repository"`
-	APIURL             string `json:"api_url"`
-	SHA                string `json:"sha"`
-	RoleSessionTagging bool   `json:"role_session_tagging"`
-	RunID              string `json:"run_id"`
-	Workflow           string `json:"workflow"`
-	Actor              string `json:"actor"`
-	Branch             string `json:"branch"`
+	GitHubToken         string `json:"github_token"`
+	RoleToAssume        string `json:"role_to_assume"`
+	RoleSessionName     string `json:"role_session_name"`
+	DurationSeconds     int32  `json:"duration_seconds"`
+	Repository          string `json:"repository"`
+	ObfuscateRepository bool   `json:"obfuscate_repository"`
+	APIURL              string `json:"api_url"`
+	SHA                 string `json:"sha"`
+	RoleSessionTagging  bool   `json:"role_session_tagging"`
+	RunID               string `json:"run_id"`
+	Workflow            string `json:"workflow"`
+	Actor               string `json:"actor"`
+	Branch              string `json:"branch"`
 }
 
 type responseBody struct {
@@ -307,7 +310,12 @@ func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBo
 
 	// assume role with the correct external ID
 	input := *validationInput
-	input.ExternalId = aws.String(req.Repository)
+	if req.ObfuscateRepository {
+		hash := sha256.Sum256([]byte(req.Repository))
+		input.ExternalId = aws.String(hex.EncodeToString(hash[:]))
+	} else {
+		input.ExternalId = aws.String(req.Repository)
+	}
 	input.DurationSeconds = aws.Int32(req.DurationSeconds)
 	resp, err := h.sts.AssumeRole(ctx, &input)
 	if err != nil {
