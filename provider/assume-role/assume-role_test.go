@@ -71,7 +71,7 @@ func TestValidateGitHubToken(t *testing.T) {
 	}
 	err := h.validateGitHubToken(context.Background(), &requestBody{
 		GitHubToken: "ghs_dummyGitHubToken",
-		Repository:  "shogo82148/actions-aws-assume-role",
+		Repository:  "fuller-inc/actions-aws-assume-role",
 		SHA:         "e3a45c6c16c1464826b36a598ff39e6cc98c4da4",
 	})
 	if err != nil {
@@ -94,7 +94,7 @@ func TestValidateGitHubToken_PermissionError(t *testing.T) {
 	}
 	err := h.validateGitHubToken(context.Background(), &requestBody{
 		GitHubToken: "ghs_dummyGitHubToken",
-		Repository:  "shogo82148/actions-aws-assume-role",
+		Repository:  "fuller-inc/actions-aws-assume-role",
 		SHA:         "e3a45c6c16c1464826b36a598ff39e6cc98c4da4",
 	})
 	if err == nil {
@@ -126,7 +126,7 @@ func TestValidateGitHubToken_InvalidCreator(t *testing.T) {
 	}
 	err := h.validateGitHubToken(context.Background(), &requestBody{
 		GitHubToken: "ghs_dummyGitHubToken",
-		Repository:  "shogo82148/actions-aws-assume-role",
+		Repository:  "fuller-inc/actions-aws-assume-role",
 		SHA:         "e3a45c6c16c1464826b36a598ff39e6cc98c4da4",
 	})
 	if err == nil {
@@ -150,7 +150,7 @@ func TestAssumeRole_AssumeRolePolicyTooOpen(t *testing.T) {
 	_, err := h.assumeRole(context.Background(), &requestBody{
 		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
 		RoleSessionName: "GitHubActions",
-		Repository:      "shogo82148/actions-aws-assume-role",
+		Repository:      "fuller-inc/actions-aws-assume-role",
 	})
 	var validate *validationError
 	if !errors.As(err, &validate) {
@@ -163,6 +163,10 @@ func TestAssumeRole(t *testing.T) {
 		sts: &stsClientMock{
 			AssumeRoleFunc: func(ctx context.Context, params *sts.AssumeRoleInput, optFns ...func(*sts.Options)) (*sts.AssumeRoleOutput, error) {
 				if params.ExternalId == nil {
+					return nil, errAccessDenied
+				}
+				if want, got := aws.ToString(params.ExternalId), "fuller-inc/actions-aws-assume-role"; want != got {
+					t.Errorf("unexpected external id: want %q, got %q", want, got)
 					return nil, errAccessDenied
 				}
 				return &sts.AssumeRoleOutput{
@@ -178,7 +182,48 @@ func TestAssumeRole(t *testing.T) {
 	resp, err := h.assumeRole(context.Background(), &requestBody{
 		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
 		RoleSessionName: "GitHubActions",
-		Repository:      "shogo82148/actions-aws-assume-role",
+		Repository:      "fuller-inc/actions-aws-assume-role",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.AccessKeyId != "AKIAIOSFODNN7EXAMPLE" {
+		t.Errorf("want %q, got %q", "AKIAIOSFODNN7EXAMPLE", resp.AccessKeyId)
+	}
+	if resp.SecretAccessKey != "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" {
+		t.Errorf("want %q, got %q", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY", resp.SecretAccessKey)
+	}
+	if resp.SessionToken != "session-token" {
+		t.Errorf("want %q, got %q", "session-token", resp.SessionToken)
+	}
+}
+
+func TestAssumeRole_ObfuscateRepository(t *testing.T) {
+	h := &Handler{
+		sts: &stsClientMock{
+			AssumeRoleFunc: func(ctx context.Context, params *sts.AssumeRoleInput, optFns ...func(*sts.Options)) (*sts.AssumeRoleOutput, error) {
+				if params.ExternalId == nil {
+					return nil, errAccessDenied
+				}
+				if got, want := aws.ToString(params.ExternalId), "339c2238399e1150eb8d76a7a74cfd92448d347dc4212bad33a4978edfc455e0"; want != got {
+					t.Errorf("unexpected external id: want %q, got %q", want, got)
+					return nil, errAccessDenied
+				}
+				return &sts.AssumeRoleOutput{
+					Credentials: &types.Credentials{
+						AccessKeyId:     aws.String("AKIAIOSFODNN7EXAMPLE"),
+						SecretAccessKey: aws.String("wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"),
+						SessionToken:    aws.String("session-token"),
+					},
+				}, nil
+			},
+		},
+	}
+	resp, err := h.assumeRole(context.Background(), &requestBody{
+		RoleToAssume:        "arn:aws:iam::123456789012:role/assume-role-test",
+		RoleSessionName:     "GitHubActions",
+		Repository:          "fuller-inc/actions-aws-assume-role",
+		ObfuscateRepository: true,
 	})
 	if err != nil {
 		t.Fatal(err)

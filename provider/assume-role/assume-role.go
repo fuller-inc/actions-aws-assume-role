@@ -3,6 +3,7 @@ package assumerole
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -311,7 +312,7 @@ func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBo
 	input := *validationInput
 	if req.ObfuscateRepository {
 		hash := sha256.Sum256([]byte(req.Repository))
-		input.ExternalId = aws.String(string(hash[:]))
+		input.ExternalId = aws.String(hex.EncodeToString(hash[:]))
 	} else {
 		input.ExternalId = aws.String(req.Repository)
 	}
