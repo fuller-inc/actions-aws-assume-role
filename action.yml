@@ -30,9 +30,9 @@ inputs:
     description: "URL for credential provider"
     required: false
   obfuscate-repository:
-    description: "obfuscate your repository name by SHA-256"
+    description: "obfuscate your repository name"
     required: true
-    default: false
+    default: ""
 runs:
   using: "node12"
   main: "action/lib/index.js"

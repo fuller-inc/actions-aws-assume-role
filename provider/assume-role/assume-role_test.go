@@ -205,7 +205,7 @@ func TestAssumeRole_ObfuscateRepository(t *testing.T) {
 				if params.ExternalId == nil {
 					return nil, errAccessDenied
 				}
-				if got, want := aws.ToString(params.ExternalId), "339c2238399e1150eb8d76a7a74cfd92448d347dc4212bad33a4978edfc455e0"; want != got {
+				if got, want := aws.ToString(params.ExternalId), "sha256:339c2238399e1150eb8d76a7a74cfd92448d347dc4212bad33a4978edfc455e0"; want != got {
 					t.Errorf("unexpected external id: want %q, got %q", want, got)
 					return nil, errAccessDenied
 				}
@@ -223,7 +223,7 @@ func TestAssumeRole_ObfuscateRepository(t *testing.T) {
 		RoleToAssume:        "arn:aws:iam::123456789012:role/assume-role-test",
 		RoleSessionName:     "GitHubActions",
 		Repository:          "fuller-inc/actions-aws-assume-role",
-		ObfuscateRepository: true,
+		ObfuscateRepository: "sha256",
 	})
 	if err != nil {
 		t.Fatal(err)

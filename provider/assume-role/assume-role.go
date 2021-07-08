@@ -77,7 +77,7 @@ type requestBody struct {
 	RoleSessionName     string `json:"role_session_name"`
 	DurationSeconds     int32  `json:"duration_seconds"`
 	Repository          string `json:"repository"`
-	ObfuscateRepository bool   `json:"obfuscate_repository"`
+	ObfuscateRepository string `json:"obfuscate_repository"`
 	APIURL              string `json:"api_url"`
 	SHA                 string `json:"sha"`
 	RoleSessionTagging  bool   `json:"role_session_tagging"`
@@ -310,11 +310,14 @@ func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBo
 
 	// assume role with the correct external ID
 	input := *validationInput
-	if req.ObfuscateRepository {
+	switch req.ObfuscateRepository {
+	case "sha256":
 		hash := sha256.Sum256([]byte(req.Repository))
-		input.ExternalId = aws.String(hex.EncodeToString(hash[:]))
-	} else {
+		input.ExternalId = aws.String("sha256:" + hex.EncodeToString(hash[:]))
+	case "":
 		input.ExternalId = aws.String(req.Repository)
+	default:
+		return nil, fmt.Errorf("invalid obfuscate repository type: %s", req.ObfuscateRepository)
 	}
 	input.DurationSeconds = aws.Int32(req.DurationSeconds)
 	resp, err := h.sts.AssumeRole(ctx, &input)
