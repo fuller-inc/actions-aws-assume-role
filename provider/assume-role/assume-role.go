@@ -32,6 +32,7 @@ const (
 
 type githubClient interface {
 	CreateStatus(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error)
+	ValidateAPIURL(url string) error
 }
 
 type stsClient interface {
@@ -74,6 +75,7 @@ type requestBody struct {
 	RoleSessionName    string `json:"role_session_name"`
 	DurationSeconds    int32  `json:"duration_seconds"`
 	Repository         string `json:"repository"`
+	APIURL             string `json:"api_url"`
 	SHA                string `json:"sha"`
 	RoleSessionTagging bool   `json:"role_session_tagging"`
 	RunID              string `json:"run_id"`
@@ -124,6 +126,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, error) {
 	if err := h.validateGitHubToken(ctx, req); err != nil {
+		return nil, err
+	}
+
+	if err := h.github.ValidateAPIURL(req.APIURL); err != nil {
 		return nil, err
 	}
 
