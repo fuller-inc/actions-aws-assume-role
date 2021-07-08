@@ -343,7 +343,9 @@ func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBo
 		case "":
 			input.ExternalId = aws.String(req.Repository)
 		default:
-			return nil, fmt.Errorf("invalid obfuscate repository type: %s", req.ObfuscateRepository)
+			return nil, &validationError{
+				message: fmt.Sprintf("invalid obfuscate repository type: %s", req.ObfuscateRepository),
+			}
 		}
 	}
 	input.DurationSeconds = aws.Int32(req.DurationSeconds)
@@ -351,8 +353,13 @@ func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBo
 	if err != nil {
 		var ae smithy.APIError
 		if errors.As(err, &ae) && ae.ErrorCode() == "AccessDenied" {
+			msg := fmt.Sprintf(
+				"AWS denied your access: %s, please check your trust policy accepts %q as sts:ExternalId.",
+				ae.ErrorMessage(),
+				aws.ToString(input.ExternalId),
+			)
 			return nil, &validationError{
-				message: ae.ErrorMessage(),
+				message: msg,
 			}
 		}
 		return nil, err
