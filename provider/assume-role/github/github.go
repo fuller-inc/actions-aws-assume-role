@@ -132,7 +132,14 @@ func (c *Client) ValidateAPIURL(url string) error {
 		return err
 	}
 	if u != c.baseURL {
-		return errors.New("your api server is not verified")
+		if c.baseURL == defaultAPIBaseURL {
+			return errors.New(
+				"it looks that you use GitHub Enterprise Server, " +
+					"but the credential provider doesn't support it. " +
+					"I recommend you to build your own credential provider",
+			)
+		}
+		return errors.New("your api server is not verified by the credential provider")
 	}
 	return nil
 }
