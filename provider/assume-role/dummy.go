@@ -35,6 +35,12 @@ func (c *githubClientDummy) CreateStatus(ctx context.Context, token, owner, repo
 	}, nil
 }
 
+func (c *githubClientDummy) GetRepo(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
+	return &github.GetRepoResponse{
+		NodeID: "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=",
+	}, nil
+}
+
 func (c *githubClientDummy) ValidateAPIURL(url string) error {
 	return nil
 }
