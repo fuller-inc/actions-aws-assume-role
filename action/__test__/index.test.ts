@@ -58,6 +58,7 @@ describe('tests', () => {
       roleSessionName: 'GitHubActions',
       roleSessionTagging: true,
       providerEndpoint: 'http://localhost:8080',
+      useNodeId: false,
       obfuscateRepository: ''
     });
     expect(process.env.AWS_ACCESS_KEY_ID).toBe('AKIAIOSFODNN7EXAMPLE');
@@ -77,6 +78,7 @@ describe('tests', () => {
         roleSessionName: 'GitHubActions',
         roleSessionTagging: true,
         providerEndpoint: 'http://localhost:8080',
+        useNodeId: false,
         obfuscateRepository: ''
       });
     }).rejects.toThrow();
