@@ -66,6 +66,7 @@ async function assumeRole(params) {
         duration_seconds: params.roleDurationSeconds,
         api_url: GITHUB_API_URL,
         repository: GITHUB_REPOSITORY,
+        useNodeId: params.useNodeId,
         obfuscate_repository: params.obfuscateRepository,
         sha: GITHUB_SHA,
         role_session_tagging: params.roleSessionTagging,
@@ -110,7 +111,8 @@ async function run() {
         const roleSessionName = core.getInput('role-session-name', required);
         const roleSessionTagging = core.getBooleanInput('role-session-tagging', required);
         const providerEndpoint = core.getInput('provider-endpoint') || 'https://uw4qs7ndjj.execute-api.us-east-1.amazonaws.com/assume-role';
-        const obfuscateRepository = core.getInput('obfuscate-repository', required);
+        const useNodeId = core.getBooleanInput('use-node-id', required);
+        const obfuscateRepository = core.getInput('obfuscate-repository');
         await assumeRole({
             githubToken,
             awsRegion,
@@ -119,6 +121,7 @@ async function run() {
             roleSessionName,
             roleSessionTagging,
             providerEndpoint,
+            useNodeId,
             obfuscateRepository
         });
     }
