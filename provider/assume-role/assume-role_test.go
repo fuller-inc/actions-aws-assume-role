@@ -15,11 +15,16 @@ import (
 
 type githubClientMock struct {
 	CreateStatusFunc   func(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error)
+	GetRepoFunc        func(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error)
 	ValidateAPIURLFunc func(url string) error
 }
 
 func (c *githubClientMock) CreateStatus(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error) {
 	return c.CreateStatusFunc(ctx, token, owner, repo, ref, status)
+}
+
+func (c *githubClientMock) GetRepo(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
+	return c.GetRepoFunc(ctx, token, owner, repo)
 }
 
 func (c *githubClientMock) ValidateAPIURL(url string) error {
@@ -183,6 +188,57 @@ func TestAssumeRole(t *testing.T) {
 		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
 		RoleSessionName: "GitHubActions",
 		Repository:      "fuller-inc/actions-aws-assume-role",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.AccessKeyId != "AKIAIOSFODNN7EXAMPLE" {
+		t.Errorf("want %q, got %q", "AKIAIOSFODNN7EXAMPLE", resp.AccessKeyId)
+	}
+	if resp.SecretAccessKey != "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" {
+		t.Errorf("want %q, got %q", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY", resp.SecretAccessKey)
+	}
+	if resp.SessionToken != "session-token" {
+		t.Errorf("want %q, got %q", "session-token", resp.SessionToken)
+	}
+}
+
+func TestAssumeRole_UseNodeID(t *testing.T) {
+	h := &Handler{
+		github: &githubClientMock{
+			GetRepoFunc: func(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
+				return &github.GetRepoResponse{
+					NodeID: "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=",
+				}, nil
+			},
+			ValidateAPIURLFunc: func(url string) error {
+				return nil
+			},
+		},
+		sts: &stsClientMock{
+			AssumeRoleFunc: func(ctx context.Context, params *sts.AssumeRoleInput, optFns ...func(*sts.Options)) (*sts.AssumeRoleOutput, error) {
+				if params.ExternalId == nil {
+					return nil, errAccessDenied
+				}
+				if got, want := aws.ToString(params.ExternalId), "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk="; want != got {
+					t.Errorf("unexpected external id: want %q, got %q", want, got)
+					return nil, errAccessDenied
+				}
+				return &sts.AssumeRoleOutput{
+					Credentials: &types.Credentials{
+						AccessKeyId:     aws.String("AKIAIOSFODNN7EXAMPLE"),
+						SecretAccessKey: aws.String("wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"),
+						SessionToken:    aws.String("session-token"),
+					},
+				}, nil
+			},
+		},
+	}
+	resp, err := h.assumeRole(context.Background(), &requestBody{
+		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
+		RoleSessionName: "GitHubActions",
+		Repository:      "fuller-inc/actions-aws-assume-role",
+		UseNodeID:       true,
 	})
 	if err != nil {
 		t.Fatal(err)

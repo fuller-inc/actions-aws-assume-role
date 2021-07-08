@@ -29,10 +29,16 @@ inputs:
   provider-endpoint:
     description: "URL for credential provider"
     required: false
+  use-node-id:
+    description: "Use the node id of the repository instead of its name"
+    required: true
+    default: false
+
   obfuscate-repository:
     description: "obfuscate your repository name"
     required: true
     default: ""
+    deprecationMessage: "obfuscate-repository is deprecated. use `use-node-id: true` instead of it."
 runs:
   using: "node12"
   main: "action/lib/index.js"
