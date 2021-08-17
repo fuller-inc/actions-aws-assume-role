@@ -35,7 +35,7 @@ And then, add the following step to your workflow:
     role-to-assume: arn:aws:iam::123456789012:role/GitHubRepoRole-us-east-2
 ```
 
-## Session tagging
+### Session tagging
 
 You can enable session tagging by adding `role-session-tagging: true`.
 
@@ -89,6 +89,59 @@ The role's trust policy need extra permission `sts:TagSession` for session taggi
   ]
 }
 ```
+
+### Use the node id of the repository
+
+You can use the global node id of the repository instead of its name as ExternalId.
+To get the node id, call [Get a repository REST API](https://docs.github.com/en/rest/reference/repos#get-a-repository).
+
+```console
+# with curl command
+curl -i -u username:token https://api.github.com/repos/{owner}/{repo}
+
+# with GitHub CLI
+gh api repos/:owner/:repo --jq '.node_id'
+```
+
+You'll get a response that includes the `node_id` of the repository:
+
+```json
+{
+  "id": 348849039,
+  "node_id": "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=",
+  "name": "actions-aws-assume-role",
+  "full_name": "fuller-inc/actions-aws-assume-role",
+  "private": false,
+  "owner": {
+    "login": "(... snip ...)"
+  }
+}
+```
+
+In this example, the `node_id` value is `MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=`.
+The role's trust policy looks like this:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::053160724612:root"
+      },
+      "Action": "sts:AssumeRole",
+      "Condition": {
+        "StringEquals": {
+          "sts:ExternalId": "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk="
+        }
+      }
+    }
+  ]
+}
+```
+
+For more information about global node IDs, see [Using global node IDs](https://docs.github.com/en/graphql/guides/using-global-node-ids).
 
 ## How to Work
 
