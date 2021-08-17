@@ -93,6 +93,16 @@ The role's trust policy need extra permission `sts:TagSession` for session taggi
 ### Use the node id of the repository
 
 You can use the global node id of the repository instead of its name as ExternalId.
+By adding `use-node-id: true`, the action sends the node id (e.g. `MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=`) as ExternalId.
+
+```yaml
+- uses: fuller-inc/actions-aws-assume-role@v1
+  with:
+    aws-region: us-east-2
+    role-to-assume: arn:aws:iam::123456789012:role/GitHubRepoRole-us-east-2
+    use-node-id: true
+```
+
 To get the node id, call [Get a repository REST API](https://docs.github.com/en/rest/reference/repos#get-a-repository).
 
 ```console
