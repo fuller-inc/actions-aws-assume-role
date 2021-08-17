@@ -51,8 +51,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/russross/blackfriday/v2 v2.0.1/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/shogo82148/aws-xray-yasdk-go v1.2.1/go.mod h1:cx4S/m/rslysVnq7wiflmPmt6bTfSV+uT5hnJDcsy9s=
-github.com/shogo82148/aws-xray-yasdk-go v1.2.3 h1:9im/aLY8+LLFd1uNzZwsPkOpUEIcxlqBxwzsqkqyYS4=
-github.com/shogo82148/aws-xray-yasdk-go v1.2.3/go.mod h1:t624hyPDr1jQ8oyReukavabRjLycol2KiToWBtdcfu8=
+github.com/shogo82148/aws-xray-yasdk-go v1.3.0 h1:C5yPsyDc6gwaS3xSpA5JOPKAZ0DkKlkQHMsKGt8jnOk=
+github.com/shogo82148/aws-xray-yasdk-go v1.3.0/go.mod h1:xRNgIaf8uXovXSzaATMQuvQejiRbFq/AB7CmvvAfSMQ=
 github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.0.0 h1:29KDWH5C2euyIuG2YbCldNkXofk/ZGQ3W6UJJ0oStNY=
 github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.0.0/go.mod h1:PfyzFwPUrKxcXwAVfWbXVHkQEpO7wmY88oa3RkDTF6w=
 github.com/shogo82148/ridgenative v1.1.1 h1:Y52XH1YHOwoK/7/KERkLrrIL4cLIizi3fkqWxc/TVB0=
