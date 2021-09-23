@@ -29,7 +29,10 @@ func TestCreateStatus(t *testing.T) {
 		rw.Write(data)
 	}))
 	defer ts.Close()
-	c := NewClient(nil)
+	c, err := NewClient(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	c.baseURL = ts.URL
 
 	resp, err := c.CreateStatus(context.Background(), "dummy-auth-token", "shogo82148", "actions-aws-assume-role", "496f02e29cc5760443becd7007049c1a2a502b6f", &CreateStatusRequest{
@@ -51,7 +54,10 @@ func TestCreateStatus(t *testing.T) {
 }
 
 func TestValidateGitHubToken(t *testing.T) {
-	c := NewClient(nil)
+	c, err := NewClient(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	c.baseURL = defaultAPIBaseURL
 	if err := c.ValidateAPIURL(""); err != nil {
 		t.Error(err)

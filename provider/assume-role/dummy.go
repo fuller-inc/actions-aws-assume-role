@@ -2,6 +2,7 @@ package assumerole
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -39,6 +40,10 @@ func (c *githubClientDummy) GetRepo(ctx context.Context, token, owner, repo stri
 	return &github.GetRepoResponse{
 		NodeID: "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=",
 	}, nil
+}
+
+func (c *githubClientDummy) ParseIDToken(ctx context.Context, idToken string) (*github.ActionsIDToken, error) {
+	return nil, errors.New("invalid jwt")
 }
 
 func (c *githubClientDummy) ValidateAPIURL(url string) error {
