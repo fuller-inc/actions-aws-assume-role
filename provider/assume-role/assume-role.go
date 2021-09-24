@@ -36,6 +36,7 @@ type githubClient interface {
 	CreateStatus(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error)
 	GetRepo(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error)
 	ValidateAPIURL(url string) error
+	ParseIDToken(ctx context.Context, idToken string) (*github.ActionsIDToken, error)
 }
 
 type stsClient interface {
@@ -65,15 +66,20 @@ func NewHandler() *Handler {
 	}
 
 	client := xrayhttp.Client(nil)
+	githubClient, err := github.NewClient(client)
+	if err != nil {
+		log.Fatalf("unable to initialize: %v", err)
+	}
 
 	return &Handler{
-		github: github.NewClient(client),
+		github: githubClient,
 		sts:    sts.NewFromConfig(cfg),
 	}
 }
 
 type requestBody struct {
 	GitHubToken         string `json:"github_token"`
+	IDToken             string `json:"id_token"`
 	RoleToAssume        string `json:"role_to_assume"`
 	RoleSessionName     string `json:"role_session_name"`
 	DurationSeconds     int32  `json:"duration_seconds"`
@@ -130,15 +136,25 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, error) {
-	if err := h.validateGitHubToken(ctx, req); err != nil {
-		return nil, err
-	}
-
 	if err := h.github.ValidateAPIURL(req.APIURL); err != nil {
 		return nil, err
 	}
 
-	resp, err := h.assumeRole(ctx, req)
+	var idToken *github.ActionsIDToken
+	if req.IDToken != "" {
+		var err error
+		idToken, err = h.github.ParseIDToken(ctx, req.IDToken)
+		if err != nil {
+			return nil, &validationError{
+				message: fmt.Sprintf("invalid oidc token: %v", err),
+			}
+		}
+	}
+	if err := h.validateGitHubToken(ctx, req); err != nil {
+		return nil, err
+	}
+
+	resp, err := h.assumeRole(ctx, idToken, req)
 	if err != nil {
 		return nil, err
 	}
@@ -264,40 +280,87 @@ func (h *Handler) getRepo(ctx context.Context, req *requestBody) (*github.GetRep
 	return h.github.GetRepo(ctx, req.GitHubToken, owner, repo)
 }
 
-func (h *Handler) assumeRole(ctx context.Context, req *requestBody) (*responseBody, error) {
+func (h *Handler) assumeRole(ctx context.Context, idToken *github.ActionsIDToken, req *requestBody) (*responseBody, error) {
 	var tags []types.Tag
 	if req.RoleSessionTagging {
-		tags = []types.Tag{
-			{
-				Key:   aws.String("GitHub"),
-				Value: aws.String("Actions"),
-			},
-			{
-				Key:   aws.String("Repository"),
-				Value: aws.String(sanitizeTagValue(req.Repository)),
-			},
-			{
-				Key:   aws.String("Workflow"),
-				Value: aws.String(sanitizeTagValue(req.Workflow)),
-			},
-			{
-				Key:   aws.String("RunId"),
-				Value: aws.String(sanitizeTagValue(req.RunID)),
-			},
-			{
-				Key:   aws.String("Actor"),
-				Value: aws.String(sanitizeTagValue(req.Actor)),
-			},
-			{
-				Key:   aws.String("Commit"),
-				Value: aws.String(sanitizeTagValue(req.SHA)),
-			},
-		}
-		if req.Branch != "" {
-			tags = append(tags, types.Tag{
-				Key:   aws.String("Branch"),
-				Value: aws.String(sanitizeTagValue(req.Branch)),
-			})
+		if idToken != nil {
+			// Get the information from the id token if it's avaliable.
+			// They are more trustworthy because they are digitally signed.
+			tags = []types.Tag{
+				{
+					Key:   aws.String("IdToken"),
+					Value: aws.String("true"),
+				},
+				{
+					Key:   aws.String("GitHub"),
+					Value: aws.String("Actions"),
+				},
+				{
+					Key:   aws.String("Repository"),
+					Value: aws.String(sanitizeTagValue(idToken.Repository)),
+				},
+				{
+					Key:   aws.String("Workflow"),
+					Value: aws.String(sanitizeTagValue(idToken.Workflow)),
+				},
+				{
+					Key:   aws.String("RunId"),
+					Value: aws.String(sanitizeTagValue(idToken.RunID)),
+				},
+				{
+					Key:   aws.String("Actor"),
+					Value: aws.String(sanitizeTagValue(idToken.Actor)),
+				},
+				{
+					Key:   aws.String("Commit"),
+					Value: aws.String(sanitizeTagValue(idToken.SHA)),
+				},
+			}
+			if idToken.Ref != "" {
+				tags = append(tags, types.Tag{
+					Key:   aws.String("Branch"),
+					Value: aws.String(sanitizeTagValue(idToken.Ref)),
+				})
+			}
+			if idToken.Environment != "" {
+				tags = append(tags, types.Tag{
+					Key:   aws.String("Environment"),
+					Value: aws.String(sanitizeTagValue(idToken.Environment)),
+				})
+			}
+		} else {
+			tags = []types.Tag{
+				{
+					Key:   aws.String("GitHub"),
+					Value: aws.String("Actions"),
+				},
+				{
+					Key:   aws.String("Repository"),
+					Value: aws.String(sanitizeTagValue(req.Repository)),
+				},
+				{
+					Key:   aws.String("Workflow"),
+					Value: aws.String(sanitizeTagValue(req.Workflow)),
+				},
+				{
+					Key:   aws.String("RunId"),
+					Value: aws.String(sanitizeTagValue(req.RunID)),
+				},
+				{
+					Key:   aws.String("Actor"),
+					Value: aws.String(sanitizeTagValue(req.Actor)),
+				},
+				{
+					Key:   aws.String("Commit"),
+					Value: aws.String(sanitizeTagValue(req.SHA)),
+				},
+			}
+			if req.Branch != "" {
+				tags = append(tags, types.Tag{
+					Key:   aws.String("Branch"),
+					Value: aws.String(sanitizeTagValue(req.Branch)),
+				})
+			}
 		}
 	}
 

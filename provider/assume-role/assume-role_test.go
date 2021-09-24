@@ -16,6 +16,7 @@ import (
 type githubClientMock struct {
 	CreateStatusFunc   func(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error)
 	GetRepoFunc        func(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error)
+	ParseIDTokenFunc   func(ctx context.Context, idToken string) (*github.ActionsIDToken, error)
 	ValidateAPIURLFunc func(url string) error
 }
 
@@ -25,6 +26,10 @@ func (c *githubClientMock) CreateStatus(ctx context.Context, token, owner, repo,
 
 func (c *githubClientMock) GetRepo(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
 	return c.GetRepoFunc(ctx, token, owner, repo)
+}
+
+func (c *githubClientMock) ParseIDToken(ctx context.Context, idToken string) (*github.ActionsIDToken, error) {
+	return c.ParseIDTokenFunc(ctx, idToken)
 }
 
 func (c *githubClientMock) ValidateAPIURL(url string) error {
@@ -152,7 +157,7 @@ func TestAssumeRole_AssumeRolePolicyTooOpen(t *testing.T) {
 			},
 		},
 	}
-	_, err := h.assumeRole(context.Background(), &requestBody{
+	_, err := h.assumeRole(context.Background(), nil, &requestBody{
 		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
 		RoleSessionName: "GitHubActions",
 		Repository:      "fuller-inc/actions-aws-assume-role",
@@ -184,7 +189,7 @@ func TestAssumeRole(t *testing.T) {
 			},
 		},
 	}
-	resp, err := h.assumeRole(context.Background(), &requestBody{
+	resp, err := h.assumeRole(context.Background(), nil, &requestBody{
 		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
 		RoleSessionName: "GitHubActions",
 		Repository:      "fuller-inc/actions-aws-assume-role",
@@ -234,7 +239,7 @@ func TestAssumeRole_UseNodeID(t *testing.T) {
 			},
 		},
 	}
-	resp, err := h.assumeRole(context.Background(), &requestBody{
+	resp, err := h.assumeRole(context.Background(), nil, &requestBody{
 		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
 		RoleSessionName: "GitHubActions",
 		Repository:      "fuller-inc/actions-aws-assume-role",
@@ -275,7 +280,7 @@ func TestAssumeRole_ObfuscateRepository(t *testing.T) {
 			},
 		},
 	}
-	resp, err := h.assumeRole(context.Background(), &requestBody{
+	resp, err := h.assumeRole(context.Background(), nil, &requestBody{
 		RoleToAssume:        "arn:aws:iam::123456789012:role/assume-role-test",
 		RoleSessionName:     "GitHubActions",
 		Repository:          "fuller-inc/actions-aws-assume-role",
