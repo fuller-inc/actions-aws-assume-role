@@ -18,6 +18,9 @@
 		"files.exclude": {
 			"provider/assume-role": true,
 			"action": true
-		}
+		},
+		"cSpell.words": [
+			"oidc"
+		]
 	}
 }
