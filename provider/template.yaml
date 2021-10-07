@@ -17,6 +17,7 @@ Resources:
       CodeUri: assume-role/
       Handler: assume-role
       Runtime: provided.al2
+      Architectures: [arm64]
       Tracing: Active
       Events:
         CatchAll:
