@@ -45,6 +45,13 @@ function validateGitHubToken(token) {
     // maybe Old Format Personal Access Tokens
     throw new Error('GITHUB_TOKEN looks like Personal Access Token. `github-token` must be `${{ github.token }}` or `${{ secrets.GITHUB_TOKEN }}`.');
 }
+// comes from the article "AWS federation comes to GitHub Actions"
+// https://awsteele.com/blog/2021/09/15/aws-federation-comes-to-github-actions.html
+function isIdTokenAvailable() {
+    const token = process.env['ACTIONS_ID_TOKEN_REQUEST_TOKEN'];
+    const url = process.env['ACTIONS_ID_TOKEN_REQUEST_URL'];
+    return token && url ? true : false;
+}
 function assertIsDefined(val) {
     if (val === undefined || val === null) {
         throw new Error(`Missing required environment value. Are you running in GitHub Actions?`);
@@ -59,8 +66,13 @@ async function assumeRole(params) {
     assertIsDefined(GITHUB_SHA);
     validateGitHubToken(params.githubToken);
     const GITHUB_API_URL = process.env['GITHUB_API_URL'] || 'https://api.github.com';
+    let idToken;
+    if (isIdTokenAvailable()) {
+        idToken = await core.getIDToken();
+    }
     const payload = {
         github_token: params.githubToken,
+        id_token: idToken,
         role_to_assume: params.roleToAssume,
         role_session_name: params.roleSessionName,
         duration_seconds: params.roleDurationSeconds,
@@ -126,7 +138,12 @@ async function run() {
         });
     }
     catch (error) {
-        core.setFailed(error.message);
+        if (error instanceof Error) {
+            core.setFailed(error);
+        }
+        else {
+            core.setFailed(`${error}`);
+        }
     }
 }
 if (require.main === module) {
