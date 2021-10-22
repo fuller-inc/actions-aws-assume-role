@@ -15,6 +15,7 @@ interface AssumeRoleParams {
 
 interface AssumeRolePayload {
   github_token: string;
+  id_token?: string;
   role_to_assume: string;
   role_session_name: string;
   duration_seconds: number;
@@ -80,6 +81,14 @@ function validateGitHubToken(token: string) {
   );
 }
 
+// comes from the article "AWS federation comes to GitHub Actions"
+// https://awsteele.com/blog/2021/09/15/aws-federation-comes-to-github-actions.html
+function isIdTokenAvailable(): boolean {
+  const token = process.env['ACTIONS_ID_TOKEN_REQUEST_TOKEN'];
+  const url = process.env['ACTIONS_ID_TOKEN_REQUEST_URL'];
+  return token && url ? true : false;
+}
+
 function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
   if (val === undefined || val === null) {
     throw new Error(`Missing required environment value. Are you running in GitHub Actions?`);
@@ -96,8 +105,14 @@ export async function assumeRole(params: AssumeRoleParams) {
   validateGitHubToken(params.githubToken);
   const GITHUB_API_URL = process.env['GITHUB_API_URL'] || 'https://api.github.com';
 
+  let idToken: string | undefined;
+  if (isIdTokenAvailable()) {
+    idToken = await core.getIDToken();
+  }
+
   const payload: AssumeRolePayload = {
     github_token: params.githubToken,
+    id_token: idToken,
     role_to_assume: params.roleToAssume,
     role_session_name: params.roleSessionName,
     duration_seconds: params.roleDurationSeconds,
@@ -169,7 +184,11 @@ async function run() {
       obfuscateRepository
     });
   } catch (error) {
-    core.setFailed(error.message);
+    if (error instanceof Error) {
+      core.setFailed(error);
+    } else {
+      core.setFailed(`${error}`);
+    }
   }
 }
 

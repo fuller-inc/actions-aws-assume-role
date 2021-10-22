@@ -11,12 +11,22 @@ import (
 	"net/url"
 	"os"
 	"strings"
+
+	"github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/github/oidc"
 )
 
 const (
-	githubUserAgent   = "actions-aws-assume-role/1.0"
+	// The value of User-Agent header
+	githubUserAgent = "actions-aws-assume-role/1.0"
+
+	// The default url of Github API
 	defaultAPIBaseURL = "https://api.github.com"
+
+	oidcIssuer = "https://token.actions.githubusercontent.com"
 )
+
+// The thumbprint of the certificate for https://token.actions.githubusercontent.com
+var oidcThumbprints = []string{"a031c46782e6e6c662c2c87c76da9aa62ccabd8e"}
 
 var apiBaseURL string
 
@@ -45,16 +55,26 @@ func (err *UnexpectedStatusCodeError) Error() string {
 type Client struct {
 	baseURL    string
 	httpClient *http.Client
+
+	// configure for OpenID Connect
+	oidcClient *oidc.Client
 }
 
-func NewClient(httpClient *http.Client) *Client {
+func NewClient(httpClient *http.Client) (*Client, error) {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
+
+	oidcClient, err := oidc.NewClient(httpClient, oidcIssuer, oidcThumbprints)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Client{
 		baseURL:    apiBaseURL,
 		httpClient: httpClient,
-	}
+		oidcClient: oidcClient,
+	}, nil
 }
 
 type CommitState string
