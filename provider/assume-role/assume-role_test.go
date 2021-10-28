@@ -16,6 +16,7 @@ import (
 type githubClientMock struct {
 	CreateStatusFunc   func(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error)
 	GetRepoFunc        func(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error)
+	GetUserFunc        func(ctx context.Context, token, user string) (*github.GetUserResponse, error)
 	ParseIDTokenFunc   func(ctx context.Context, idToken string) (*github.ActionsIDToken, error)
 	ValidateAPIURLFunc func(url string) error
 }
@@ -26,6 +27,10 @@ func (c *githubClientMock) CreateStatus(ctx context.Context, token, owner, repo,
 
 func (c *githubClientMock) GetRepo(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
 	return c.GetRepoFunc(ctx, token, owner, repo)
+}
+
+func (c *githubClientMock) GetUser(ctx context.Context, token, user string) (*github.GetUserResponse, error) {
+	return c.GetUserFunc(ctx, token, user)
 }
 
 func (c *githubClientMock) ParseIDToken(ctx context.Context, idToken string) (*github.ActionsIDToken, error) {
@@ -156,6 +161,18 @@ func TestAssumeRole_AssumeRolePolicyTooOpen(t *testing.T) {
 				return &sts.AssumeRoleOutput{}, nil
 			},
 		},
+		github: &githubClientMock{
+			GetRepoFunc: func(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
+				return &github.GetRepoResponse{
+					NodeID: "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=",
+				}, nil
+			},
+			GetUserFunc: func(ctx context.Context, token, user string) (*github.GetUserResponse, error) {
+				return &github.GetUserResponse{
+					NodeID: "MDQ6VXNlcjExNTczNDQ=",
+				}, nil
+			},
+		},
 	}
 	_, err := h.assumeRole(context.Background(), nil, &requestBody{
 		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
@@ -188,6 +205,18 @@ func TestAssumeRole(t *testing.T) {
 				}, nil
 			},
 		},
+		github: &githubClientMock{
+			GetRepoFunc: func(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
+				return &github.GetRepoResponse{
+					NodeID: "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=",
+				}, nil
+			},
+			GetUserFunc: func(ctx context.Context, token, user string) (*github.GetUserResponse, error) {
+				return &github.GetUserResponse{
+					NodeID: "MDQ6VXNlcjExNTczNDQ=",
+				}, nil
+			},
+		},
 	}
 	resp, err := h.assumeRole(context.Background(), nil, &requestBody{
 		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
@@ -214,6 +243,11 @@ func TestAssumeRole_UseNodeID(t *testing.T) {
 			GetRepoFunc: func(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
 				return &github.GetRepoResponse{
 					NodeID: "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=",
+				}, nil
+			},
+			GetUserFunc: func(ctx context.Context, token, user string) (*github.GetUserResponse, error) {
+				return &github.GetUserResponse{
+					NodeID: "MDQ6VXNlcjExNTczNDQ=",
 				}, nil
 			},
 			ValidateAPIURLFunc: func(url string) error {
