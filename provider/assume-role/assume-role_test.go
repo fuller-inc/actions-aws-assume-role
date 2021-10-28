@@ -295,6 +295,21 @@ func TestAssumeRole_UseNodeID(t *testing.T) {
 
 func TestAssumeRole_ObfuscateRepository(t *testing.T) {
 	h := &Handler{
+		github: &githubClientMock{
+			GetRepoFunc: func(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
+				return &github.GetRepoResponse{
+					NodeID: "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=",
+				}, nil
+			},
+			GetUserFunc: func(ctx context.Context, token, user string) (*github.GetUserResponse, error) {
+				return &github.GetUserResponse{
+					NodeID: "MDQ6VXNlcjExNTczNDQ=",
+				}, nil
+			},
+			ValidateAPIURLFunc: func(url string) error {
+				return nil
+			},
+		},
 		sts: &stsClientMock{
 			AssumeRoleFunc: func(ctx context.Context, params *sts.AssumeRoleInput, optFns ...func(*sts.Options)) (*sts.AssumeRoleOutput, error) {
 				if params.ExternalId == nil {
