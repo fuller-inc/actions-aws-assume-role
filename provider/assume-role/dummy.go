@@ -42,6 +42,12 @@ func (c *githubClientDummy) GetRepo(ctx context.Context, token, owner, repo stri
 	}, nil
 }
 
+func (c *githubClientDummy) GetUser(ctx context.Context, token, user string) (*github.GetUserResponse, error) {
+	return &github.GetUserResponse{
+		NodeID: "MDQ6VXNlcjExNTczNDQ=",
+	}, nil
+}
+
 func (c *githubClientDummy) ParseIDToken(ctx context.Context, idToken string) (*github.ActionsIDToken, error) {
 	return nil, errors.New("invalid jwt")
 }
