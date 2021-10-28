@@ -153,6 +153,48 @@ The role's trust policy looks like this:
 
 For more information about global node IDs, see [Using global node IDs](https://docs.github.com/en/graphql/guides/using-global-node-ids).
 
+## About security hardening with OpenID Connect
+
+The action also supports [OpenID Connect (OIDC)](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect).
+
+- Additional session tags "Audience" and "Subject" are available
+- All session tags are signed by GitHub OIDC Provider. You can use them in the `Condition` element in your IAM JSON policy
+
+Example workflow:
+
+```yaml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      statuses: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: fuller-inc/actions-aws-assume-role@v1
+        with:
+          aws-region: us-east-2
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubRepoRole-us-east-2
+```
+
+| Key         | Value                      |
+| ----------- | -------------------------- |
+| Audience    | `aud` of the token         |
+| Subject     | `sub` of the token         |
+| Environment | `environment` of the token |
+| GitHub      | "Actions"                  |
+| Repository  | `GITHUB_REPOSITORY`        |
+| Workflow    | `GITHUB_WORKFLOW`          |
+| RunId       | `GITHUB_RUN_ID`            |
+| Actor       | `GITHUB_ACTOR`             |
+| Branch      | `GITHUB_REF`               |
+| Commit      | `GITHUB_SHA`               |
+
 ## How to Work
 
 ![How to Work](how-to-work.svg)

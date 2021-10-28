@@ -35,6 +35,7 @@ const (
 type githubClient interface {
 	CreateStatus(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error)
 	GetRepo(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error)
+	GetUser(ctx context.Context, token, user string) (*github.GetUserResponse, error)
 	ValidateAPIURL(url string) error
 	ParseIDToken(ctx context.Context, idToken string) (*github.ActionsIDToken, error)
 }
@@ -272,24 +273,74 @@ func (h *Handler) updateCommitStatus(ctx context.Context, req *requestBody, stat
 	return h.github.CreateStatus(ctx, req.GitHubToken, owner, repo, req.SHA, status)
 }
 
-func (h *Handler) getRepo(ctx context.Context, req *requestBody) (*github.GetRepoResponse, error) {
-	owner, repo, err := splitOwnerRepo(req.Repository)
+func (h *Handler) getRepo(ctx context.Context, idToken *github.ActionsIDToken, req *requestBody) (*github.GetRepoResponse, error) {
+	var owner, repo string
+	var err error
+	if idToken != nil {
+		owner, repo, err = splitOwnerRepo(idToken.Repository)
+	} else {
+		owner, repo, err = splitOwnerRepo(req.Repository)
+	}
 	if err != nil {
 		return nil, err
 	}
 	return h.github.GetRepo(ctx, req.GitHubToken, owner, repo)
 }
 
+func (h *Handler) getUser(ctx context.Context, idToken *github.ActionsIDToken, req *requestBody) (*github.GetUserResponse, error) {
+	if idToken != nil {
+		return h.github.GetUser(ctx, req.GitHubToken, idToken.Actor)
+	} else {
+		return h.github.GetUser(ctx, req.GitHubToken, req.Actor)
+	}
+}
+
 func (h *Handler) assumeRole(ctx context.Context, idToken *github.ActionsIDToken, req *requestBody) (*responseBody, error) {
+	repo, err := h.getRepo(ctx, idToken, req)
+	if err != nil {
+		return nil, err
+	}
+	user, err := h.getUser(ctx, idToken, req)
+	if err != nil {
+		return nil, err
+	}
+
+	var repository, actor string
+	if req.UseNodeID {
+		repository = repo.NodeID
+		actor = user.NodeID
+	} else if idToken != nil {
+		repository = idToken.Repository
+		actor = idToken.Actor
+	} else {
+		repository = req.Repository
+		actor = req.Actor
+	}
+
 	var tags []types.Tag
 	if req.RoleSessionTagging {
 		if idToken != nil {
 			// Get the information from the id token if it's avaliable.
 			// They are more trustworthy because they are digitally signed.
+			subject := idToken.Subject
+			if req.UseNodeID {
+				fragment := strings.SplitN(subject, ":", 3)
+				if len(fragment) != 3 {
+					return nil, &validationError{
+						message: fmt.Sprintf("invalid subject format: %q", subject),
+					}
+				}
+				fragment[1] = repository
+				subject = strings.Join(fragment, ":")
+			}
 			tags = []types.Tag{
 				{
-					Key:   aws.String("IdToken"),
-					Value: aws.String("true"),
+					Key:   aws.String("Audience"),
+					Value: aws.String(sanitizeTagValue(idToken.Audience)),
+				},
+				{
+					Key:   aws.String("Subject"),
+					Value: aws.String(sanitizeTagValue(subject)),
 				},
 				{
 					Key:   aws.String("GitHub"),
@@ -297,7 +348,7 @@ func (h *Handler) assumeRole(ctx context.Context, idToken *github.ActionsIDToken
 				},
 				{
 					Key:   aws.String("Repository"),
-					Value: aws.String(sanitizeTagValue(idToken.Repository)),
+					Value: aws.String(sanitizeTagValue(repository)),
 				},
 				{
 					Key:   aws.String("Workflow"),
@@ -309,7 +360,7 @@ func (h *Handler) assumeRole(ctx context.Context, idToken *github.ActionsIDToken
 				},
 				{
 					Key:   aws.String("Actor"),
-					Value: aws.String(sanitizeTagValue(idToken.Actor)),
+					Value: aws.String(sanitizeTagValue(actor)),
 				},
 				{
 					Key:   aws.String("Commit"),
@@ -336,7 +387,7 @@ func (h *Handler) assumeRole(ctx context.Context, idToken *github.ActionsIDToken
 				},
 				{
 					Key:   aws.String("Repository"),
-					Value: aws.String(sanitizeTagValue(req.Repository)),
+					Value: aws.String(sanitizeTagValue(repository)),
 				},
 				{
 					Key:   aws.String("Workflow"),
@@ -348,7 +399,7 @@ func (h *Handler) assumeRole(ctx context.Context, idToken *github.ActionsIDToken
 				},
 				{
 					Key:   aws.String("Actor"),
-					Value: aws.String(sanitizeTagValue(req.Actor)),
+					Value: aws.String(sanitizeTagValue(actor)),
 				},
 				{
 					Key:   aws.String("Commit"),
@@ -377,7 +428,7 @@ func (h *Handler) assumeRole(ctx context.Context, idToken *github.ActionsIDToken
 
 		// request without the correct external ID
 	}
-	_, err := h.sts.AssumeRole(ctx, validationInput)
+	_, err = h.sts.AssumeRole(ctx, validationInput)
 	if err == nil {
 		return nil, &validationError{
 			message: "The AssumeRolePolicy of your IAM Role is too open. Please configure ExternalId conditions.",
@@ -393,10 +444,6 @@ func (h *Handler) assumeRole(ctx context.Context, idToken *github.ActionsIDToken
 	// assume role with the correct external ID
 	input := *validationInput
 	if req.UseNodeID {
-		repo, err := h.getRepo(ctx, req)
-		if err != nil {
-			return nil, err
-		}
 		input.ExternalId = aws.String(repo.NodeID)
 	} else {
 		switch req.ObfuscateRepository {
