@@ -288,8 +288,12 @@ func (h *Handler) assumeRole(ctx context.Context, idToken *github.ActionsIDToken
 			// They are more trustworthy because they are digitally signed.
 			tags = []types.Tag{
 				{
-					Key:   aws.String("IdToken"),
-					Value: aws.String("true"),
+					Key:   aws.String("Audience"),
+					Value: aws.String(sanitizeTagValue(idToken.Audience)),
+				},
+				{
+					Key:   aws.String("Subject"),
+					Value: aws.String(sanitizeTagValue(idToken.Subject)),
 				},
 				{
 					Key:   aws.String("GitHub"),
