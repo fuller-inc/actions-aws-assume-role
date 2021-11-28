@@ -174,7 +174,7 @@ func TestAssumeRole_AssumeRolePolicyTooOpen(t *testing.T) {
 			},
 		},
 	}
-	_, err := h.assumeRole(context.Background(), nil, &requestBody{
+	_, err := h.assumeRole(context.Background(), false, nil, &requestBody{
 		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
 		RoleSessionName: "GitHubActions",
 		Repository:      "fuller-inc/actions-aws-assume-role",
@@ -218,7 +218,7 @@ func TestAssumeRole(t *testing.T) {
 			},
 		},
 	}
-	resp, err := h.assumeRole(context.Background(), nil, &requestBody{
+	resp, err := h.assumeRole(context.Background(), false, nil, &requestBody{
 		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
 		RoleSessionName: "GitHubActions",
 		Repository:      "fuller-inc/actions-aws-assume-role",
@@ -273,7 +273,7 @@ func TestAssumeRole_UseNodeID(t *testing.T) {
 			},
 		},
 	}
-	resp, err := h.assumeRole(context.Background(), nil, &requestBody{
+	resp, err := h.assumeRole(context.Background(), false, nil, &requestBody{
 		RoleToAssume:    "arn:aws:iam::123456789012:role/assume-role-test",
 		RoleSessionName: "GitHubActions",
 		Repository:      "fuller-inc/actions-aws-assume-role",
@@ -329,7 +329,7 @@ func TestAssumeRole_ObfuscateRepository(t *testing.T) {
 			},
 		},
 	}
-	resp, err := h.assumeRole(context.Background(), nil, &requestBody{
+	resp, err := h.assumeRole(context.Background(), false, nil, &requestBody{
 		RoleToAssume:        "arn:aws:iam::123456789012:role/assume-role-test",
 		RoleSessionName:     "GitHubActions",
 		Repository:          "fuller-inc/actions-aws-assume-role",

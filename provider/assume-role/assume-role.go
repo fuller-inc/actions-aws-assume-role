@@ -155,11 +155,24 @@ func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, 
 		return nil, err
 	}
 
-	resp, err := h.assumeRole(ctx, idToken, req)
-	if err != nil {
-		return nil, err
+	// Use Next ID format
+	resp0, err0 := h.assumeRole(ctx, true, idToken, req)
+	if err0 == nil {
+		return resp0, nil
 	}
-	return resp, nil
+	if !req.UseNodeID {
+		return nil, err0
+	}
+
+	// Use legacy or next ID format
+	resp1, err1 := h.assumeRole(ctx, false, idToken, req)
+	if err1 != nil {
+		return nil, err0
+	}
+	resp1.Warning += "It looks that you use legacy node IDs. You need to migrate them. " +
+		"See https://github.com/fuller-inc/actions-aws-assume-role#use-the-node-id-of-the-repository for more detail.\n" +
+		err0.Error()
+	return resp1, nil
 }
 
 func (h *Handler) handleError(w http.ResponseWriter, r *http.Request, err error) {
@@ -273,10 +286,12 @@ func (h *Handler) updateCommitStatus(ctx context.Context, req *requestBody, stat
 	return h.github.CreateStatus(ctx, req.GitHubToken, owner, repo, req.SHA, status)
 }
 
-func (h *Handler) getRepo(ctx context.Context, idToken *github.ActionsIDToken, req *requestBody) (*github.GetRepoResponse, error) {
+func (h *Handler) getRepo(ctx context.Context, nextIDFormat bool, idToken *github.ActionsIDToken, req *requestBody) (*github.GetRepoResponse, error) {
 	var owner, repo string
 	var err error
 	if idToken != nil {
+		// Get the information from the id token if it's avaliable.
+		// They are more trustworthy because they are digitally signed.
 		owner, repo, err = splitOwnerRepo(idToken.Repository)
 	} else {
 		owner, repo, err = splitOwnerRepo(req.Repository)
@@ -287,20 +302,22 @@ func (h *Handler) getRepo(ctx context.Context, idToken *github.ActionsIDToken, r
 	return h.github.GetRepo(ctx, false, req.GitHubToken, owner, repo)
 }
 
-func (h *Handler) getUser(ctx context.Context, idToken *github.ActionsIDToken, req *requestBody) (*github.GetUserResponse, error) {
+func (h *Handler) getUser(ctx context.Context, nextIDFormat bool, idToken *github.ActionsIDToken, req *requestBody) (*github.GetUserResponse, error) {
 	if idToken != nil {
+		// Get the information from the id token if it's avaliable.
+		// They are more trustworthy because they are digitally signed.
 		return h.github.GetUser(ctx, false, req.GitHubToken, idToken.Actor)
 	} else {
 		return h.github.GetUser(ctx, false, req.GitHubToken, req.Actor)
 	}
 }
 
-func (h *Handler) assumeRole(ctx context.Context, idToken *github.ActionsIDToken, req *requestBody) (*responseBody, error) {
-	repo, err := h.getRepo(ctx, idToken, req)
+func (h *Handler) assumeRole(ctx context.Context, nextIDFormat bool, idToken *github.ActionsIDToken, req *requestBody) (*responseBody, error) {
+	repo, err := h.getRepo(ctx, nextIDFormat, idToken, req)
 	if err != nil {
 		return nil, err
 	}
-	user, err := h.getUser(ctx, idToken, req)
+	user, err := h.getUser(ctx, nextIDFormat, idToken, req)
 	if err != nil {
 		return nil, err
 	}
