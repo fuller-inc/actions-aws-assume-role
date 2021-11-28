@@ -15,8 +15,8 @@ import (
 
 type githubClientMock struct {
 	CreateStatusFunc   func(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error)
-	GetRepoFunc        func(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error)
-	GetUserFunc        func(ctx context.Context, token, user string) (*github.GetUserResponse, error)
+	GetRepoFunc        func(ctx context.Context, nextIDFormat bool, token, owner, repo string) (*github.GetRepoResponse, error)
+	GetUserFunc        func(ctx context.Context, nextIDFormat bool, token, user string) (*github.GetUserResponse, error)
 	ParseIDTokenFunc   func(ctx context.Context, idToken string) (*github.ActionsIDToken, error)
 	ValidateAPIURLFunc func(url string) error
 }
@@ -25,12 +25,12 @@ func (c *githubClientMock) CreateStatus(ctx context.Context, token, owner, repo,
 	return c.CreateStatusFunc(ctx, token, owner, repo, ref, status)
 }
 
-func (c *githubClientMock) GetRepo(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
-	return c.GetRepoFunc(ctx, token, owner, repo)
+func (c *githubClientMock) GetRepo(ctx context.Context, nextIDFormat bool, token, owner, repo string) (*github.GetRepoResponse, error) {
+	return c.GetRepoFunc(ctx, nextIDFormat, token, owner, repo)
 }
 
-func (c *githubClientMock) GetUser(ctx context.Context, token, user string) (*github.GetUserResponse, error) {
-	return c.GetUserFunc(ctx, token, user)
+func (c *githubClientMock) GetUser(ctx context.Context, nextIDFormat bool, token, user string) (*github.GetUserResponse, error) {
+	return c.GetUserFunc(ctx, nextIDFormat, token, user)
 }
 
 func (c *githubClientMock) ParseIDToken(ctx context.Context, idToken string) (*github.ActionsIDToken, error) {
@@ -162,12 +162,12 @@ func TestAssumeRole_AssumeRolePolicyTooOpen(t *testing.T) {
 			},
 		},
 		github: &githubClientMock{
-			GetRepoFunc: func(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
+			GetRepoFunc: func(ctx context.Context, nextIDFormat bool, token, owner, repo string) (*github.GetRepoResponse, error) {
 				return &github.GetRepoResponse{
 					NodeID: "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=",
 				}, nil
 			},
-			GetUserFunc: func(ctx context.Context, token, user string) (*github.GetUserResponse, error) {
+			GetUserFunc: func(ctx context.Context, nextIDFormat bool, token, user string) (*github.GetUserResponse, error) {
 				return &github.GetUserResponse{
 					NodeID: "MDQ6VXNlcjExNTczNDQ=",
 				}, nil
@@ -206,12 +206,12 @@ func TestAssumeRole(t *testing.T) {
 			},
 		},
 		github: &githubClientMock{
-			GetRepoFunc: func(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
+			GetRepoFunc: func(ctx context.Context, nextIDFormat bool, token, owner, repo string) (*github.GetRepoResponse, error) {
 				return &github.GetRepoResponse{
 					NodeID: "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=",
 				}, nil
 			},
-			GetUserFunc: func(ctx context.Context, token, user string) (*github.GetUserResponse, error) {
+			GetUserFunc: func(ctx context.Context, nextIDFormat bool, token, user string) (*github.GetUserResponse, error) {
 				return &github.GetUserResponse{
 					NodeID: "MDQ6VXNlcjExNTczNDQ=",
 				}, nil
@@ -240,12 +240,12 @@ func TestAssumeRole(t *testing.T) {
 func TestAssumeRole_UseNodeID(t *testing.T) {
 	h := &Handler{
 		github: &githubClientMock{
-			GetRepoFunc: func(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
+			GetRepoFunc: func(ctx context.Context, nextIDFormat bool, token, owner, repo string) (*github.GetRepoResponse, error) {
 				return &github.GetRepoResponse{
 					NodeID: "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=",
 				}, nil
 			},
-			GetUserFunc: func(ctx context.Context, token, user string) (*github.GetUserResponse, error) {
+			GetUserFunc: func(ctx context.Context, nextIDFormat bool, token, user string) (*github.GetUserResponse, error) {
 				return &github.GetUserResponse{
 					NodeID: "MDQ6VXNlcjExNTczNDQ=",
 				}, nil
@@ -296,12 +296,12 @@ func TestAssumeRole_UseNodeID(t *testing.T) {
 func TestAssumeRole_ObfuscateRepository(t *testing.T) {
 	h := &Handler{
 		github: &githubClientMock{
-			GetRepoFunc: func(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
+			GetRepoFunc: func(ctx context.Context, nextIDFormat bool, token, owner, repo string) (*github.GetRepoResponse, error) {
 				return &github.GetRepoResponse{
 					NodeID: "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=",
 				}, nil
 			},
-			GetUserFunc: func(ctx context.Context, token, user string) (*github.GetUserResponse, error) {
+			GetUserFunc: func(ctx context.Context, nextIDFormat bool, token, user string) (*github.GetUserResponse, error) {
 				return &github.GetUserResponse{
 					NodeID: "MDQ6VXNlcjExNTczNDQ=",
 				}, nil

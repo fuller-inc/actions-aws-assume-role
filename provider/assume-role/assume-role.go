@@ -34,8 +34,8 @@ const (
 
 type githubClient interface {
 	CreateStatus(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error)
-	GetRepo(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error)
-	GetUser(ctx context.Context, token, user string) (*github.GetUserResponse, error)
+	GetRepo(ctx context.Context, nextIDFormat bool, token, owner, repo string) (*github.GetRepoResponse, error)
+	GetUser(ctx context.Context, nextIDFormat bool, token, user string) (*github.GetUserResponse, error)
 	ValidateAPIURL(url string) error
 	ParseIDToken(ctx context.Context, idToken string) (*github.ActionsIDToken, error)
 }
@@ -284,14 +284,14 @@ func (h *Handler) getRepo(ctx context.Context, idToken *github.ActionsIDToken, r
 	if err != nil {
 		return nil, err
 	}
-	return h.github.GetRepo(ctx, req.GitHubToken, owner, repo)
+	return h.github.GetRepo(ctx, false, req.GitHubToken, owner, repo)
 }
 
 func (h *Handler) getUser(ctx context.Context, idToken *github.ActionsIDToken, req *requestBody) (*github.GetUserResponse, error) {
 	if idToken != nil {
-		return h.github.GetUser(ctx, req.GitHubToken, idToken.Actor)
+		return h.github.GetUser(ctx, false, req.GitHubToken, idToken.Actor)
 	} else {
-		return h.github.GetUser(ctx, req.GitHubToken, req.Actor)
+		return h.github.GetUser(ctx, false, req.GitHubToken, req.Actor)
 	}
 }
 

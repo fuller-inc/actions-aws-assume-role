@@ -18,8 +18,12 @@ func TestGetRepo(t *testing.T) {
 		if r.URL.Path != path {
 			t.Errorf("unexpected path: want %q, got %q", path, r.URL.Path)
 		}
+		idFormat := r.Header.Get("X-Github-Next-Global-ID")
+		if idFormat != "0" {
+			t.Errorf("unexpected X-Github-Next-Global-ID header: want %s, got %s", "0", idFormat)
+		}
 
-		data, err := os.ReadFile("testdata/get-repo.json")
+		data, err := os.ReadFile("testdata/get-repo-current.json")
 		if err != nil {
 			panic(err)
 		}
@@ -35,7 +39,7 @@ func TestGetRepo(t *testing.T) {
 	}
 	c.baseURL = ts.URL
 
-	resp, err := c.GetRepo(context.Background(), "dummy-auth-token", "fuller-inc", "actions-aws-assume-role")
+	resp, err := c.GetRepo(context.Background(), false, "dummy-auth-token", "fuller-inc", "actions-aws-assume-role")
 	if err != nil {
 		t.Fatal(err)
 	}

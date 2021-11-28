@@ -18,8 +18,12 @@ func TestGetUser(t *testing.T) {
 		if r.URL.Path != path {
 			t.Errorf("unexpected path: want %q, got %q", path, r.URL.Path)
 		}
+		idFormat := r.Header.Get("X-Github-Next-Global-ID")
+		if idFormat != "0" {
+			t.Errorf("unexpected X-Github-Next-Global-ID header: want %s, got %s", "0", idFormat)
+		}
 
-		data, err := os.ReadFile("testdata/get-user.json")
+		data, err := os.ReadFile("testdata/get-user-current.json")
 		if err != nil {
 			panic(err)
 		}
@@ -35,7 +39,7 @@ func TestGetUser(t *testing.T) {
 	}
 	c.baseURL = ts.URL
 
-	resp, err := c.GetUser(context.Background(), "dummy-auth-token", "shogo82148")
+	resp, err := c.GetUser(context.Background(), false, "dummy-auth-token", "shogo82148")
 	if err != nil {
 		t.Fatal(err)
 	}
