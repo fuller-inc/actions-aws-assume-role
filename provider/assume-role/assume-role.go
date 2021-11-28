@@ -170,7 +170,7 @@ func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, 
 		return nil, err0
 	}
 	resp1.Warning += "It looks that you use legacy node IDs. You need to migrate them. " +
-		"See https://github.com/fuller-inc/actions-aws-assume-role#use-the-node-id-of-the-repository for more detail.\n" +
+		"See https://github.com/fuller-inc/actions-aws-assume-role#migrate-your-node-id-to-the-next-format for more detail.\n" +
 		err0.Error()
 	return resp1, nil
 }
