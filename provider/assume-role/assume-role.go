@@ -299,16 +299,16 @@ func (h *Handler) getRepo(ctx context.Context, nextIDFormat bool, idToken *githu
 	if err != nil {
 		return nil, err
 	}
-	return h.github.GetRepo(ctx, false, req.GitHubToken, owner, repo)
+	return h.github.GetRepo(ctx, nextIDFormat, req.GitHubToken, owner, repo)
 }
 
 func (h *Handler) getUser(ctx context.Context, nextIDFormat bool, idToken *github.ActionsIDToken, req *requestBody) (*github.GetUserResponse, error) {
 	if idToken != nil {
 		// Get the information from the id token if it's avaliable.
 		// They are more trustworthy because they are digitally signed.
-		return h.github.GetUser(ctx, false, req.GitHubToken, idToken.Actor)
+		return h.github.GetUser(ctx, nextIDFormat, req.GitHubToken, idToken.Actor)
 	} else {
-		return h.github.GetUser(ctx, false, req.GitHubToken, req.Actor)
+		return h.github.GetUser(ctx, nextIDFormat, req.GitHubToken, req.Actor)
 	}
 }
 
