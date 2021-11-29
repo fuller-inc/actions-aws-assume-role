@@ -107,10 +107,10 @@ To get the node id, call [Get a repository REST API](https://docs.github.com/en/
 
 ```console
 # with curl command
-curl -i -u username:token -H "X-Github-Next-Global-ID: 1" https://api.github.com/repos/{owner}/{repo}
+curl -i -u username:token -H "X-Github-Next-Global-ID: 1" "https://api.github.com/repos/{owner}/{repo}"
 
 # with GitHub CLI
-gh api repos/:owner/:repo -H "X-Github-Next-Global-ID: 1" --jq '.node_id'
+gh api "repos/{owner}/{repo}" -H "X-Github-Next-Global-ID: 1" --jq ".node_id"
 ```
 
 You'll get a response that includes the `node_id` of the repository:
@@ -167,10 +167,10 @@ If you use `curl` or `gh` (GitHub CLI), add the `-H "X-Github-Next-Global-ID: 1"
 
 ```console
 # with curl command
-curl -i -u username:token -H "X-Github-Next-Global-ID: 1" https://api.github.com/repos/{owner}/{repo}
+curl -i -u username:token -H "X-Github-Next-Global-ID: 1" "https://api.github.com/repos/{owner}/{repo}"
 
 # with GitHub CLI
-gh api repos/:owner/:repo -H "X-Github-Next-Global-ID: 1" --jq '.node_id'
+gh api "repos/{owner}/{repo}" -H "X-Github-Next-Global-ID: 1" --jq ".node_id"
 ```
 
 Your role's trust policy looks like this:
