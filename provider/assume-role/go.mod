@@ -9,8 +9,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.11.1
 	github.com/aws/smithy-go v1.9.0
 	github.com/golang-jwt/jwt/v4 v4.2.0
-	github.com/shogo82148/aws-xray-yasdk-go v1.4.2
-	github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.0.3
+	github.com/shogo82148/aws-xray-yasdk-go v1.4.3
+	github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.0.4
 	github.com/shogo82148/ridgenative v1.1.1
 )
 
