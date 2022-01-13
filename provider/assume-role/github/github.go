@@ -22,9 +22,6 @@ const (
 	oidcIssuer = "https://token.actions.githubusercontent.com"
 )
 
-// The thumbprint of the certificate for https://token.actions.githubusercontent.com
-var oidcThumbprints = []string{"a031c46782e6e6c662c2c87c76da9aa62ccabd8e"}
-
 var apiBaseURL string
 
 func init() {
@@ -62,7 +59,7 @@ func NewClient(httpClient *http.Client) (*Client, error) {
 		httpClient = http.DefaultClient
 	}
 
-	oidcClient, err := oidc.NewClient(httpClient, oidcIssuer, oidcThumbprints)
+	oidcClient, err := oidc.NewClient(httpClient, oidcIssuer)
 	if err != nil {
 		return nil, err
 	}
