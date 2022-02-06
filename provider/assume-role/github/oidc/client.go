@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/github/jwk"
+	"github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/github/memoize"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -26,6 +28,8 @@ type Doer interface {
 type Client struct {
 	httpClient Doer
 	issuer     string
+	oidcConfig memoize.Group[string, *Config]
+	jwks       memoize.Group[string, *jwk.Set]
 }
 
 func NewClient(httpClient Doer, issuer string) (*Client, error) {
