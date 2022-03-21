@@ -3,7 +3,7 @@ module github.com/fuller-inc/actions-aws-assume-role/provider/assume-role
 go 1.18
 
 require (
-	github.com/aws/aws-lambda-go v1.26.0 // indirect
+	github.com/aws/aws-lambda-go v1.28.0 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.15.0
 	github.com/aws/aws-sdk-go-v2/config v1.15.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.0
@@ -11,7 +11,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/shogo82148/aws-xray-yasdk-go v1.4.3
 	github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.0.4
-	github.com/shogo82148/ridgenative v1.1.1
+	github.com/shogo82148/ridgenative v1.1.2
 )
 
 require (
