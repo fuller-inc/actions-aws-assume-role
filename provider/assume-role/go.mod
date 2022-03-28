@@ -4,10 +4,10 @@ go 1.18
 
 require (
 	github.com/aws/aws-lambda-go v1.28.0 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.15.0
+	github.com/aws/aws-sdk-go-v2 v1.16.1
 	github.com/aws/aws-sdk-go-v2/config v1.15.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.0
-	github.com/aws/smithy-go v1.11.1
+	github.com/aws/smithy-go v1.11.2
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/shogo82148/aws-xray-yasdk-go v1.4.3
 	github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.0.4
