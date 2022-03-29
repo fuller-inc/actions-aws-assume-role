@@ -40,7 +40,7 @@ inputs:
     default: ""
     deprecationMessage: "obfuscate-repository is deprecated. use `use-node-id: true` instead of it."
 runs:
-  using: "node12"
+  using: "node16"
   main: "action/lib/index.js"
   post: "action/lib/cleanup.js"
 branding:

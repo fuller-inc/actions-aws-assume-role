@@ -5,18 +5,19 @@ import (
 	"crypto/ecdsa"
 	"crypto/ed25519"
 	"crypto/rsa"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/github/jwk"
+	"github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/github/memoize"
 	"github.com/golang-jwt/jwt/v4"
 )
 
 const (
 	// The value of User-Agent header
-	httpUserAgent = "actions-github-token/1.0"
+	httpUserAgent = "actions-aws-assume-role/1.0"
 )
 
 // Doer is a interface for doing an http request.
@@ -25,31 +26,20 @@ type Doer interface {
 }
 
 type Client struct {
-	httpClient  Doer
-	issuer      string
-	thumbprints [][]byte
+	httpClient Doer
+	issuer     string
+	oidcConfig memoize.Group[string, *Config]
+	jwks       memoize.Group[string, *jwk.Set]
 }
 
-func NewClient(httpClient Doer, issuer string, thumbprints []string) (*Client, error) {
-	// https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc_verify-thumbprint.html
-	// decode thumbprints
-	decoded := make([][]byte, 0, len(thumbprints))
-	for _, thumb := range thumbprints {
-		data, err := hex.DecodeString(thumb)
-		if err != nil {
-			return nil, fmt.Errorf("oidc: failed to parse thumbprints: %w", err)
-		}
-		decoded = append(decoded, data)
-	}
-
+func NewClient(httpClient Doer, issuer string) (*Client, error) {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
 
 	return &Client{
-		httpClient:  httpClient,
-		issuer:      issuer,
-		thumbprints: decoded,
+		httpClient: httpClient,
+		issuer:     issuer,
 	}, nil
 }
 
