@@ -118,7 +118,7 @@ func canonicalURL(rawurl string) (string, error) {
 	case "":
 		u.Scheme = "http"
 	default:
-		return "", fmt.Errorf("unknown scheme: %s", u.Scheme)
+		return "", fmt.Errorf("unknown scheme: %q", u.Scheme)
 	}
 	if port == defaultPort {
 		port = ""
