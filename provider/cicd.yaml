@@ -132,7 +132,7 @@ Resources:
                 Effect: Allow
                 Action: "cloudformation:*"
                 Resource:
-                  - !Sub "arn:aws:cloudformation:us-east-1:${AWS::AccountId}:stack/aws-assume-role/*"
+                  - !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/aws-assume-role/*"
               - Sid: CloudFormationDenyImport
                 Effect: Deny
                 Action: "cloudformation:*"
