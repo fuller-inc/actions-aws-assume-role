@@ -176,7 +176,7 @@ func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, 
 }
 
 func (h *Handler) handleError(w http.ResponseWriter, r *http.Request, err error) {
-	log.Println(err)
+	log.Printf("error: %v", err)
 	status := http.StatusInternalServerError
 	var body *errorResponseBody
 
