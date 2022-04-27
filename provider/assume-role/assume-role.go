@@ -137,7 +137,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, error) {
-	if err := h.github.ValidateAPIURL(req.APIURL); err != nil {
+	if err := h.validate(ctx, req); err != nil {
 		return nil, err
 	}
 
@@ -173,6 +173,53 @@ func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, 
 		"See https://github.com/fuller-inc/actions-aws-assume-role#migrate-your-node-id-to-the-next-format for more detail.\n" +
 		err0.Error()
 	return resp1, nil
+}
+
+func (h *Handler) validate(ctx context.Context, req *requestBody) error {
+	if err := h.github.ValidateAPIURL(req.APIURL); err != nil {
+		return err
+	}
+	if req.RoleToAssume == "" {
+		return &validationError{
+			message: "missing required input: role-to-assume",
+		}
+	}
+	if req.RoleSessionName == "" {
+		return &validationError{
+			message: "missing required input: role-session-name",
+		}
+	}
+	if req.Repository == "" {
+		return &validationError{
+			message: "Missing required environment value: GITHUB_REPOSITORY",
+		}
+	}
+	if req.SHA == "" {
+		return &validationError{
+			message: "Missing required environment value: GITHUB_SHA",
+		}
+	}
+	if req.RunID == "" {
+		return &validationError{
+			message: "Missing required environment value: GITHUB_RUN_ID",
+		}
+	}
+	if req.Workflow == "" {
+		return &validationError{
+			message: "Missing required environment value: GITHUB_WORKFLOW",
+		}
+	}
+	if req.Actor == "" {
+		return &validationError{
+			message: "Missing required environment value: GITHUB_ACTOR",
+		}
+	}
+	if req.DurationSeconds <= 0 || req.DurationSeconds > 60*60 {
+		return &validationError{
+			message: fmt.Sprintf("invalid role-duration-seconds %d, it should be from 1 to 3600", req.DurationSeconds),
+		}
+	}
+	return nil
 }
 
 func (h *Handler) handleError(w http.ResponseWriter, r *http.Request, err error) {
