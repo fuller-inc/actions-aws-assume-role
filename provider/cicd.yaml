@@ -16,6 +16,7 @@ Resources:
             Action:
               - "logs:*"
               - "sts:*"
+              - "xray:*"
             Resource: "*"
 
   # CloudFormation Service Role for deploying SAM templates
