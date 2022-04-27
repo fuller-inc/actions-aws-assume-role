@@ -8,6 +8,11 @@ Parameters:
     Default: https://api.github.com
     Description: The URL for GitHub API. You might need to configure it if you use GitHub Enterprise Server.
 
+Globals:
+  Function:
+    Timeout: 5
+    PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/aws-assume-role-permissions-boundary-us-east-1"
+
 Resources:
   ProviderFunction:
     Type: AWS::Serverless::Function

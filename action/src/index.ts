@@ -172,6 +172,9 @@ async function run() {
       core.getInput('provider-endpoint') || 'https://uw4qs7ndjj.execute-api.us-east-1.amazonaws.com/assume-role';
     const useNodeId = core.getBooleanInput('use-node-id', required);
     const obfuscateRepository = core.getInput('obfuscate-repository');
+    if (roleDurationSeconds <= 0 || roleDurationSeconds > 60 * 60) {
+      core.setFailed(`invalid role-duration-seconds ${roleDurationSeconds}, it should be from 1 to 3600`);
+    }
     await assumeRole({
       githubToken,
       awsRegion,
