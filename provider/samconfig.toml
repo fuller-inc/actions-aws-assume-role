@@ -3,8 +3,8 @@ version = 0.1
 [default.deploy]
 [default.deploy.parameters]
 stack_name = "aws-assume-role"
+role_arn = "arn:aws:iam::053160724612:role/aws-assume-role-cfn-service-role-us-east-1"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1vv3atlnyqj73"
 s3_prefix = "aws-assume-role"
 region = "us-east-1"
-confirm_changeset = true
 capabilities = "CAPABILITY_IAM"

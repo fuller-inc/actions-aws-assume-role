@@ -5,6 +5,7 @@
 
 version: 2
 updates:
+  # Maintain dependencies for Node.js
   - package-ecosystem: "npm"
     directory: "/action"
     schedule:
@@ -13,7 +14,15 @@ updates:
       # update too often, ignore patch releases
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-patch"]
+
+  # Maintain dependencies for Go
   - package-ecosystem: "gomod"
     directory: "/provider/assume-role"
+    schedule:
+      interval: "daily"
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "daily"
