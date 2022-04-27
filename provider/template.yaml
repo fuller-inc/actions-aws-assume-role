@@ -25,14 +25,35 @@ Resources:
           Properties:
             Path: /assume-role
             Method: POST
-      Policies:
-        - Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Action:
-                - sts:AssumeRole
-                - sts:TagSession
-              Resource: "*"
+      Role: !GetAtt ProviderFunctionRole.Arn
       Environment:
         Variables:
           GITHUB_API_URL: !Ref ApiUrl
+
+  ProviderFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "sts:AssumeRole"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+      PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/aws-assume-role-permissions-boundary-us-east-1"
+      MaxSessionDuration: 43200 # 43200 seconds = 12 hours
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        - "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
+      Policies:
+        - PolicyName: ProviderFunctionRolePolicy0
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                  - sts:TagSession
+                Resource: "*"
