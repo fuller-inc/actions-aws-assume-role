@@ -11,8 +11,8 @@
   "author": "Fuller, Inc.",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.8.0",
-    "@actions/http-client": "^2.0.0"
+    "@actions/core": "^1.8.2",
+    "@actions/http-client": "^2.0.1"
   },
   "devDependencies": {
     "@actions/exec": "^1.1.1",
