@@ -22,4 +22,5 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.12 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.6 // indirect
+	gopkg.in/yaml.v3 v3.0.0 // indirect
 )
