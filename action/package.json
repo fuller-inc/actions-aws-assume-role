@@ -1,6 +1,6 @@
 {
   "name": "actions-aws-assume-role",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "assume role in GitHub Actions",
   "main": "lib/index.js",
   "scripts": {
