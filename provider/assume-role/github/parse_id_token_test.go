@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/github/oidc"
+	"github.com/shogo82148/goat/oidc"
 )
 
-func TestParseIDToken_Intergrated(t *testing.T) {
+func TestParseIDToken_Integrated(t *testing.T) {
 	idToken := os.Getenv("ACTIONS_ID_TOKEN_REQUEST_TOKEN")
 	idURL := os.Getenv("ACTIONS_ID_TOKEN_REQUEST_URL")
 	if idToken == "" || idURL == "" {
@@ -28,7 +28,10 @@ func TestParseIDToken_Intergrated(t *testing.T) {
 	}
 	t.Logf("the id is issued at %s", time.Now())
 
-	oidcClient, err := oidc.NewClient(http.DefaultClient, oidcIssuer)
+	oidcClient, err := oidc.NewClient(&oidc.ClientConfig{
+		Doer:   http.DefaultClient,
+		Issuer: oidcIssuer,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,12 +45,7 @@ func TestParseIDToken_Intergrated(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("sub: %s", id.Subject)
-	t.Logf("job_workflow_ref: %s", id.JobWorkflowRef)
-	t.Logf("aud: %s", id.Audience)
-	t.Logf("issued at %s", id.IssuedAt)
-	t.Logf("not before %s", id.NotBefore)
-	t.Logf("expires at %s", id.ExpiresAt)
+	t.Logf("raw: %#v", id.Raw)
 
 	if got, want := id.Actor, os.Getenv("GITHUB_ACTOR"); got != want {
 		t.Errorf("unexpected actor: want %q, got %q", want, got)

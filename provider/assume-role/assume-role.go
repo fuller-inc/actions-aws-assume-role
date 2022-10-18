@@ -384,7 +384,7 @@ func (h *Handler) assumeRole(ctx context.Context, nextIDFormat bool, idToken *gi
 	var tags []types.Tag
 	if req.RoleSessionTagging {
 		if idToken != nil {
-			// Get the information from the id token if it's avaliable.
+			// Get the information from the id token if it's available.
 			// They are more trustworthy because they are digitally signed.
 			subject := idToken.Subject
 			if req.UseNodeID {
@@ -400,7 +400,7 @@ func (h *Handler) assumeRole(ctx context.Context, nextIDFormat bool, idToken *gi
 			tags = []types.Tag{
 				{
 					Key:   aws.String("Audience"),
-					Value: aws.String(sanitizeTagValue(idToken.Audience)),
+					Value: aws.String(sanitizeTagValue(idToken.Audience[0])),
 				},
 				{
 					Key:   aws.String("Subject"),
