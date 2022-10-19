@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/github/oidc"
+	"github.com/shogo82148/goat/oidc"
 )
 
 const (
@@ -59,11 +59,14 @@ func NewClient(httpClient *http.Client) (*Client, error) {
 		httpClient = http.DefaultClient
 	}
 
-	oidcClient, err := oidc.NewClient(httpClient, oidcIssuer)
+	oidcClient, err := oidc.NewClient(&oidc.ClientConfig{
+		Doer:      httpClient,
+		Issuer:    oidcIssuer,
+		UserAgent: githubUserAgent,
+	})
 	if err != nil {
 		return nil, err
 	}
-
 	return &Client{
 		baseURL:    apiBaseURL,
 		httpClient: httpClient,
