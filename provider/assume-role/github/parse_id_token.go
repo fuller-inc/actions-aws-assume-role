@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	_ "github.com/shogo82148/goat/jwa/rs"
 	"github.com/shogo82148/goat/jws"
 	"github.com/shogo82148/goat/jwt"
 	"github.com/shogo82148/goat/sig"
