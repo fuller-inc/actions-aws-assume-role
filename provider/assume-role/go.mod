@@ -10,7 +10,7 @@ require (
 	github.com/aws/smithy-go v1.13.4
 	github.com/shogo82148/aws-xray-yasdk-go v1.5.1
 	github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.1
-	github.com/shogo82148/goat v0.0.2
+	github.com/shogo82148/goat v0.0.3
 	github.com/shogo82148/ridgenative v1.2.1
 )
 
@@ -25,4 +25,5 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.13.7 // indirect
 	github.com/shogo82148/memoize v0.0.2 // indirect
 	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a // indirect
+	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
 )
