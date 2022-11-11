@@ -137,6 +137,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, error) {
+	var warning string
 	if err := h.validate(ctx, req); err != nil {
 		return nil, err
 	}
@@ -150,6 +151,9 @@ func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, 
 				message: fmt.Sprintf("invalid oidc token: %v", err),
 			}
 		}
+	} else {
+		warning = "Using GITHUB_TOKEN is deprecated. Use OIDC instead of it. " +
+			"See https://github.com/fuller-inc/actions-aws-assume-role/issues/454 and https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect"
 	}
 	if err := h.validateGitHubToken(ctx, req); err != nil {
 		return nil, err
@@ -158,6 +162,7 @@ func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, 
 	// Use Next ID format
 	resp0, err0 := h.assumeRole(ctx, true, idToken, req)
 	if err0 == nil {
+		resp0.Warning += warning
 		return resp0, nil
 	}
 	if !req.UseNodeID {
@@ -169,6 +174,7 @@ func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, 
 	if err1 != nil {
 		return nil, err0
 	}
+	resp1.Warning += warning
 	resp1.Warning += "It looks that you use legacy node IDs. You need to migrate them. " +
 		"See https://github.com/fuller-inc/actions-aws-assume-role#migrate-your-node-id-to-the-next-format for more detail.\n" +
 		err0.Error()
