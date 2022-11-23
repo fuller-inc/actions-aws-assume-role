@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"net/url"
 )
 
 type CommitState string
@@ -40,12 +40,12 @@ type CreateStatusResponseCreator struct {
 // https://docs.github.com/en/rest/reference/repos#create-a-commit-status
 func (c *Client) CreateStatus(ctx context.Context, token, owner, repo, ref string, status *CreateStatusRequest) (*CreateStatusResponse, error) {
 	// build the request
-	u := fmt.Sprintf("%s/repos/%s/%s/statuses/%s", c.baseURL, owner, repo, ref)
+	u := c.baseURL.JoinPath("repos", url.PathEscape(owner), url.PathEscape(repo), "statuses", url.PathEscape(ref))
 	body, err := json.Marshal(status)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u, bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}

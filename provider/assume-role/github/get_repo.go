@@ -3,8 +3,8 @@ package github
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"net/url"
 )
 
 type GetRepoResponse struct {
@@ -15,8 +15,8 @@ type GetRepoResponse struct {
 
 func (c *Client) GetRepo(ctx context.Context, nextIDFormat bool, token, owner, repo string) (*GetRepoResponse, error) {
 	// build the request
-	u := fmt.Sprintf("%s/repos/%s/%s", c.baseURL, owner, repo)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	u := c.baseURL.JoinPath("repos", url.PathEscape(owner), url.PathEscape(repo))
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err
 	}

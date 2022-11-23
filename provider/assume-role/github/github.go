@@ -47,7 +47,7 @@ func (err *UnexpectedStatusCodeError) Error() string {
 
 // Client is a very light weight GitHub API Client.
 type Client struct {
-	baseURL    string
+	baseURL    *url.URL
 	httpClient *http.Client
 
 	// configure for OpenID Connect
@@ -67,8 +67,12 @@ func NewClient(httpClient *http.Client) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	u, err := url.Parse(apiBaseURL)
+	if err != nil {
+		return nil, err
+	}
 	return &Client{
-		baseURL:    apiBaseURL,
+		baseURL:    u,
 		httpClient: httpClient,
 		oidcClient: oidcClient,
 	}, nil
@@ -84,8 +88,8 @@ func (c *Client) ValidateAPIURL(url string) error {
 	if err != nil {
 		return err
 	}
-	if u != c.baseURL {
-		if c.baseURL == defaultAPIBaseURL {
+	if u != c.baseURL.String() {
+		if c.baseURL.String() == defaultAPIBaseURL {
 			return errors.New(
 				"it looks that you use GitHub Enterprise Server, " +
 					"but the credential provider doesn't support it. " +

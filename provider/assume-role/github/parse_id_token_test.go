@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"os"
 	"testing"
 	"time"
@@ -36,8 +37,12 @@ func TestParseIDToken_Integrated(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	u, err := url.Parse(apiBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
 	c := &Client{
-		baseURL:    apiBaseURL,
+		baseURL:    u,
 		httpClient: http.DefaultClient,
 		oidcClient: oidcClient,
 	}
