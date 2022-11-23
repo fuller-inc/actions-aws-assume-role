@@ -3,8 +3,8 @@ package github
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"net/url"
 )
 
 type GetUserResponse struct {
@@ -15,8 +15,8 @@ type GetUserResponse struct {
 
 func (c *Client) GetUser(ctx context.Context, nextIDFormat bool, token, user string) (*GetUserResponse, error) {
 	// build the request
-	u := fmt.Sprintf("%s/users/%s", c.baseURL, user)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	u := c.baseURL.JoinPath("users", url.PathEscape(user))
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err
 	}
