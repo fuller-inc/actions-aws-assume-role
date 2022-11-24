@@ -558,7 +558,7 @@ func (h *Handler) assumeRole(ctx context.Context, nextIDFormat bool, idToken *gi
 }
 
 // https://docs.aws.amazon.com/STS/latest/APIReference/API_Tag.html
-const tagSanitizationCharactor = "_"
+const tagSanitizationCharacter = "_"
 const tagMaxValueLength = 256
 
 func sanitizeTagValue(s string) string {
@@ -571,7 +571,7 @@ func sanitizeTagValue(s string) string {
 		if validTagRune(r) {
 			builder.WriteRune(r)
 		} else {
-			builder.WriteString(tagSanitizationCharactor)
+			builder.WriteString(tagSanitizationCharacter)
 		}
 	}
 	return builder.String()
