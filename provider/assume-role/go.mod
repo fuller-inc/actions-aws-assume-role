@@ -14,6 +14,8 @@ require (
 	github.com/shogo82148/ridgenative v1.2.1
 )
 
+require github.com/shogo82148/ctxlog v0.1.0
+
 require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.3 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.19 // indirect
