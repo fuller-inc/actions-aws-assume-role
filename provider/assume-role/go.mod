@@ -10,11 +10,10 @@ require (
 	github.com/aws/smithy-go v1.13.4
 	github.com/shogo82148/aws-xray-yasdk-go v1.5.2
 	github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.2
+	github.com/shogo82148/ctxlog v0.1.0
 	github.com/shogo82148/goat v0.0.5
 	github.com/shogo82148/ridgenative v1.2.1
 )
-
-require github.com/shogo82148/ctxlog v0.1.0
 
 require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.3 // indirect
