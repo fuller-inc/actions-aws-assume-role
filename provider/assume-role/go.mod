@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-lambda-go v1.36.1 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.17.3
 	github.com/aws/aws-sdk-go-v2/config v1.18.8
-	github.com/aws/aws-sdk-go-v2/service/sts v1.18.0
+	github.com/aws/aws-sdk-go-v2/service/sts v1.18.1
 	github.com/aws/smithy-go v1.13.5
 	github.com/shogo82148/aws-xray-yasdk-go v1.5.2
 	github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.2
