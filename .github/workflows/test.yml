@@ -17,13 +17,8 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: "1.19"
+          go-version-file: provider/assume-role/go.mod
 
-      - name: restore cache
-        uses: actions/cache@v3
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
       - name: download dependencies
         run: go mod download
         working-directory: provider/assume-role
@@ -50,13 +45,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: "1.19"
-
-      - name: restore cache
-        uses: actions/cache@v3
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+          go-version-file: provider/assume-role/go.mod
 
       - name: download dependencies
         run: go mod download
