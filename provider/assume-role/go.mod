@@ -1,6 +1,6 @@
 module github.com/fuller-inc/actions-aws-assume-role/provider/assume-role
 
-go 1.19
+go 1.20
 
 require (
 	github.com/aws/aws-lambda-go v1.36.1 // indirect
