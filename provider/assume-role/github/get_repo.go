@@ -14,6 +14,14 @@ type GetRepoResponse struct {
 }
 
 func (c *Client) GetRepo(ctx context.Context, nextIDFormat bool, token, owner, repo string) (*GetRepoResponse, error) {
+	// validate the parameters
+	if err := validateUserName(owner); err != nil {
+		return nil, err
+	}
+	if err := validateRepoName(repo); err != nil {
+		return nil, err
+	}
+
 	// build the request
 	u := c.baseURL.JoinPath("repos", url.PathEscape(owner), url.PathEscape(repo))
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
