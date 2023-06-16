@@ -143,3 +143,30 @@ func canonicalURL(rawurl string) (string, error) {
 
 	return u.String(), nil
 }
+
+func validateUserName(s string) error {
+	for _, r := range s {
+		if (r < 'a' || 'z' < r) && (r < 'A' || 'Z' < r) && (r < '0' || '9' < r) && r != '-' && r != '_' {
+			return fmt.Errorf("github: username contains invalid character: %q", r)
+		}
+	}
+	return nil
+}
+
+func validateRepoName(s string) error {
+	for _, r := range s {
+		if (r < 'a' || 'z' < r) && (r < 'A' || 'Z' < r) && (r < '0' || '9' < r) && r != '-' && r != '_' && r != '.' {
+			return fmt.Errorf("github: repo name contains invalid character: %q", r)
+		}
+	}
+	return nil
+}
+
+func validateRef(s string) error {
+	for _, r := range s {
+		if (r < 'a' || 'f' < r) && (r < 'A' || 'F' < r) && (r < '0' || '9' < r) {
+			return fmt.Errorf("github: ref contains invalid character: %q", r)
+		}
+	}
+	return nil
+}

@@ -14,6 +14,11 @@ type GetUserResponse struct {
 }
 
 func (c *Client) GetUser(ctx context.Context, nextIDFormat bool, token, user string) (*GetUserResponse, error) {
+	// validate the parameters
+	if err := validateUserName(user); err != nil {
+		return nil, err
+	}
+
 	// build the request
 	u := c.baseURL.JoinPath("users", url.PathEscape(user))
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
