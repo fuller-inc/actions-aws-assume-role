@@ -146,7 +146,21 @@ func canonicalURL(rawurl string) (string, error) {
 
 func validateUserName(s string) error {
 	for _, r := range s {
-		if (r < 'a' || 'z' < r) && (r < 'A' || 'Z' < r) && (r < '0' || '9' < r) && r != '-' && r != '_' {
+		// normal user name
+		var ok bool
+		ok = ok || 'a' <= r && r <= 'z'
+		ok = ok || 'A' <= r && r <= 'Z'
+		ok = ok || '0' <= r && r <= '9'
+		ok = ok || r == '-'
+
+		// Enterprise Managed Users contains '_'.
+		// https://docs.github.com/en/enterprise-cloud@latest/admin/identity-and-access-management/using-enterprise-managed-users-for-iam/about-enterprise-managed-users
+		ok = ok || r == '_'
+
+		// GitHub Apps contains '[' and ']'.
+		ok = ok || r == '[' || r == ']'
+
+		if !ok {
 			return fmt.Errorf("github: username contains invalid character: %q", r)
 		}
 	}
@@ -155,7 +169,12 @@ func validateUserName(s string) error {
 
 func validateRepoName(s string) error {
 	for _, r := range s {
-		if (r < 'a' || 'z' < r) && (r < 'A' || 'Z' < r) && (r < '0' || '9' < r) && r != '-' && r != '_' && r != '.' {
+		var ok bool
+		ok = ok || 'a' <= r && r <= 'z'
+		ok = ok || 'A' <= r && r <= 'Z'
+		ok = ok || '0' <= r && r <= '9'
+		ok = ok || r == '-' || r == '_' || r == '.'
+		if !ok {
 			return fmt.Errorf("github: repo name contains invalid character: %q", r)
 		}
 	}
