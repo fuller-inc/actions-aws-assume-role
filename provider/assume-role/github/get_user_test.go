@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"strconv"
 	"testing"
@@ -37,7 +38,11 @@ func TestGetUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	c.baseURL = ts.URL
+	u, err := url.Parse(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.baseURL = u
 
 	resp, err := c.GetUser(context.Background(), false, "dummy-auth-token", "shogo82148")
 	if err != nil {
@@ -76,7 +81,11 @@ func TestGetUser_WithNextNodeID(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	c.baseURL = ts.URL
+	u, err := url.Parse(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.baseURL = u
 
 	resp, err := c.GetUser(context.Background(), true, "dummy-auth-token", "shogo82148")
 	if err != nil {

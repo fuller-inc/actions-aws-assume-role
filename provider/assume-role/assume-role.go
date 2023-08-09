@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,8 +20,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 	"github.com/aws/smithy-go"
 	"github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/github"
+	"github.com/shogo82148/aws-xray-yasdk-go/xray"
 	"github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2"
 	"github.com/shogo82148/aws-xray-yasdk-go/xrayhttp"
+	log "github.com/shogo82148/ctxlog"
 )
 
 const (
@@ -110,6 +111,9 @@ type errorResponseBody struct {
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	ctx = log.With(ctx, log.Fields{
+		"x-amzn-trace-id": xray.ContextTraceID(ctx),
+	})
 
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -137,6 +141,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, error) {
+	var warning string
 	if err := h.validate(ctx, req); err != nil {
 		return nil, err
 	}
@@ -150,14 +155,19 @@ func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, 
 				message: fmt.Sprintf("invalid oidc token: %v", err),
 			}
 		}
-	}
-	if err := h.validateGitHubToken(ctx, req); err != nil {
-		return nil, err
+	} else {
+		log.Warn(ctx, "oidc is not available", nil)
+		warning = "Using GITHUB_TOKEN is deprecated. Use OIDC instead of it. " +
+			"See https://github.com/fuller-inc/actions-aws-assume-role/issues/454 and https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect"
+		if err := h.validateGitHubToken(ctx, req); err != nil {
+			return nil, err
+		}
 	}
 
 	// Use Next ID format
 	resp0, err0 := h.assumeRole(ctx, true, idToken, req)
 	if err0 == nil {
+		resp0.Warning += warning
 		return resp0, nil
 	}
 	if !req.UseNodeID {
@@ -169,9 +179,11 @@ func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, 
 	if err1 != nil {
 		return nil, err0
 	}
+	resp1.Warning += warning
 	resp1.Warning += "It looks that you use legacy node IDs. You need to migrate them. " +
 		"See https://github.com/fuller-inc/actions-aws-assume-role#migrate-your-node-id-to-the-next-format for more detail.\n" +
 		err0.Error()
+	log.Warn(ctx, "using legacy node id", nil)
 	return resp1, nil
 }
 
@@ -337,7 +349,7 @@ func (h *Handler) getRepo(ctx context.Context, nextIDFormat bool, idToken *githu
 	var owner, repo string
 	var err error
 	if idToken != nil {
-		// Get the information from the id token if it's avaliable.
+		// Get the information from the id token if it's available.
 		// They are more trustworthy because they are digitally signed.
 		owner, repo, err = splitOwnerRepo(idToken.Repository)
 	} else {
@@ -351,7 +363,7 @@ func (h *Handler) getRepo(ctx context.Context, nextIDFormat bool, idToken *githu
 
 func (h *Handler) getUser(ctx context.Context, nextIDFormat bool, idToken *github.ActionsIDToken, req *requestBody) (*github.GetUserResponse, error) {
 	if idToken != nil {
-		// Get the information from the id token if it's avaliable.
+		// Get the information from the id token if it's available.
 		// They are more trustworthy because they are digitally signed.
 		return h.github.GetUser(ctx, nextIDFormat, req.GitHubToken, idToken.Actor)
 	} else {
@@ -384,7 +396,7 @@ func (h *Handler) assumeRole(ctx context.Context, nextIDFormat bool, idToken *gi
 	var tags []types.Tag
 	if req.RoleSessionTagging {
 		if idToken != nil {
-			// Get the information from the id token if it's avaliable.
+			// Get the information from the id token if it's available.
 			// They are more trustworthy because they are digitally signed.
 			subject := idToken.Subject
 			if req.UseNodeID {
@@ -400,7 +412,7 @@ func (h *Handler) assumeRole(ctx context.Context, nextIDFormat bool, idToken *gi
 			tags = []types.Tag{
 				{
 					Key:   aws.String("Audience"),
-					Value: aws.String(sanitizeTagValue(idToken.Audience)),
+					Value: aws.String(sanitizeTagValue(idToken.Audience[0])),
 				},
 				{
 					Key:   aws.String("Subject"),
@@ -546,7 +558,7 @@ func (h *Handler) assumeRole(ctx context.Context, nextIDFormat bool, idToken *gi
 }
 
 // https://docs.aws.amazon.com/STS/latest/APIReference/API_Tag.html
-const tagSanitizationCharactor = "_"
+const tagSanitizationCharacter = "_"
 const tagMaxValueLength = 256
 
 func sanitizeTagValue(s string) string {
@@ -559,7 +571,7 @@ func sanitizeTagValue(s string) string {
 		if validTagRune(r) {
 			builder.WriteRune(r)
 		} else {
-			builder.WriteString(tagSanitizationCharactor)
+			builder.WriteString(tagSanitizationCharacter)
 		}
 	}
 	return builder.String()

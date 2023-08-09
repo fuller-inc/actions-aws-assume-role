@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"strconv"
 	"testing"
@@ -37,7 +38,11 @@ func TestGetRepo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	c.baseURL = ts.URL
+	u, err := url.Parse(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.baseURL = u
 
 	resp, err := c.GetRepo(context.Background(), false, "dummy-auth-token", "fuller-inc", "actions-aws-assume-role")
 	if err != nil {
@@ -76,7 +81,11 @@ func TestGetRepo_WithNextNodeID(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	c.baseURL = ts.URL
+	u, err := url.Parse(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.baseURL = u
 
 	resp, err := c.GetRepo(context.Background(), true, "dummy-auth-token", "fuller-inc", "actions-aws-assume-role")
 	if err != nil {

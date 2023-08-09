@@ -18,19 +18,14 @@ jobs:
     environment: production
 
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: "1.19"
-
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: restore cache
-        uses: actions/cache@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
         with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+          go-version-file: provider/assume-role/go.mod
+
       - name: download dependencies
         run: go mod download
         working-directory: provider/assume-role

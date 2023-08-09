@@ -1,6 +1,7 @@
 package github
 
 import (
+	"net/url"
 	"testing"
 )
 
@@ -9,7 +10,11 @@ func TestValidateAPIURL(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	c.baseURL = defaultAPIBaseURL
+	u, err := url.Parse(defaultAPIBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.baseURL = u
 	if err := c.ValidateAPIURL(""); err != nil {
 		t.Error(err)
 	}

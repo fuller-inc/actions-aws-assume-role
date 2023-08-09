@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/github/oidc"
+	"github.com/shogo82148/goat/oidc"
 )
 
 const (
@@ -47,7 +47,7 @@ func (err *UnexpectedStatusCodeError) Error() string {
 
 // Client is a very light weight GitHub API Client.
 type Client struct {
-	baseURL    string
+	baseURL    *url.URL
 	httpClient *http.Client
 
 	// configure for OpenID Connect
@@ -59,13 +59,20 @@ func NewClient(httpClient *http.Client) (*Client, error) {
 		httpClient = http.DefaultClient
 	}
 
-	oidcClient, err := oidc.NewClient(httpClient, oidcIssuer)
+	oidcClient, err := oidc.NewClient(&oidc.ClientConfig{
+		Doer:      httpClient,
+		Issuer:    oidcIssuer,
+		UserAgent: githubUserAgent,
+	})
 	if err != nil {
 		return nil, err
 	}
-
+	u, err := url.Parse(apiBaseURL)
+	if err != nil {
+		return nil, err
+	}
 	return &Client{
-		baseURL:    apiBaseURL,
+		baseURL:    u,
 		httpClient: httpClient,
 		oidcClient: oidcClient,
 	}, nil
@@ -81,8 +88,8 @@ func (c *Client) ValidateAPIURL(url string) error {
 	if err != nil {
 		return err
 	}
-	if u != c.baseURL {
-		if c.baseURL == defaultAPIBaseURL {
+	if u != c.baseURL.String() {
+		if c.baseURL.String() == defaultAPIBaseURL {
 			return errors.New(
 				"it looks that you use GitHub Enterprise Server, " +
 					"but the credential provider doesn't support it. " +
@@ -135,4 +142,50 @@ func canonicalURL(rawurl string) (string, error) {
 	u.RawQuery = ""
 
 	return u.String(), nil
+}
+
+func validateUserName(s string) error {
+	for _, r := range s {
+		// normal user name
+		var ok bool
+		ok = ok || 'a' <= r && r <= 'z'
+		ok = ok || 'A' <= r && r <= 'Z'
+		ok = ok || '0' <= r && r <= '9'
+		ok = ok || r == '-'
+
+		// Enterprise Managed Users contains '_'.
+		// https://docs.github.com/en/enterprise-cloud@latest/admin/identity-and-access-management/using-enterprise-managed-users-for-iam/about-enterprise-managed-users
+		ok = ok || r == '_'
+
+		// GitHub Apps contains '[' and ']'.
+		ok = ok || r == '[' || r == ']'
+
+		if !ok {
+			return fmt.Errorf("github: username contains invalid character: %q", r)
+		}
+	}
+	return nil
+}
+
+func validateRepoName(s string) error {
+	for _, r := range s {
+		var ok bool
+		ok = ok || 'a' <= r && r <= 'z'
+		ok = ok || 'A' <= r && r <= 'Z'
+		ok = ok || '0' <= r && r <= '9'
+		ok = ok || r == '-' || r == '_' || r == '.'
+		if !ok {
+			return fmt.Errorf("github: repo name contains invalid character: %q", r)
+		}
+	}
+	return nil
+}
+
+func validateRef(s string) error {
+	for _, r := range s {
+		if (r < 'a' || 'f' < r) && (r < 'A' || 'F' < r) && (r < '0' || '9' < r) {
+			return fmt.Errorf("github: ref contains invalid character: %q", r)
+		}
+	}
+	return nil
 }

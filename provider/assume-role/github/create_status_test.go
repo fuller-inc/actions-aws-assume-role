@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"strconv"
 	"testing"
@@ -33,7 +34,11 @@ func TestCreateStatus(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	c.baseURL = ts.URL
+	u, err := url.Parse(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.baseURL = u
 
 	resp, err := c.CreateStatus(context.Background(), "dummy-auth-token", "shogo82148", "actions-aws-assume-role", "496f02e29cc5760443becd7007049c1a2a502b6f", &CreateStatusRequest{
 		State:   CommitStateSuccess,
