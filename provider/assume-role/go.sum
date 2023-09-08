@@ -30,8 +30,8 @@ github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9Y
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1/go.mod h1:L3OGu8Wl2/fWfCI6z80xFu9LTZmf1ZRjMHUOPmWr69U=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/shogo82148/aws-xray-yasdk-go v1.6.0 h1:lS2FJKaoteHbf+fQuqisqROUwq3NOZ3B/qFA/YIKVWc=
-github.com/shogo82148/aws-xray-yasdk-go v1.6.0/go.mod h1:oz8SCOMbtQvC6TbfMKVzl6aJjpiaqwvATlV6RN0vJ3Q=
+github.com/shogo82148/aws-xray-yasdk-go v1.7.0 h1:A3Jg9j+k3au1sol0YppvyWF4Dm6BvPOpudoNPdlzEyM=
+github.com/shogo82148/aws-xray-yasdk-go v1.7.0/go.mod h1:oz8SCOMbtQvC6TbfMKVzl6aJjpiaqwvATlV6RN0vJ3Q=
 github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.2 h1:Jc/0X/UJR+jKkyYWR2y7vVFOdV9tyFmj/eWljKu/+h8=
 github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.2/go.mod h1:lbBd5tit21fsG6Tt4NhVxIsHUEGi94ubs7neIzucIMo=
 github.com/shogo82148/ctxlog v0.1.0 h1:WN1kcHxnFFPrqMNKK+ZM8GKrjqAKQymWekjeq6EZ7ao=
