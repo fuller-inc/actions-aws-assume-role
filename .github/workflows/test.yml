@@ -10,6 +10,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,6 +35,10 @@ jobs:
   action:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix:
