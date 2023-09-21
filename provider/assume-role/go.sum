@@ -1,6 +1,7 @@
 github.com/aws/aws-sdk-go-v2 v1.21.0 h1:gMT0IW+03wtYJhRqTVYn0wLzwdnK9sRMcxmtfGzRdJc=
 github.com/aws/aws-sdk-go-v2 v1.21.0/go.mod h1:/RfNgGmRxI+iFOB1OeJUyxiU+9s88k3pfHvDagGEp0M=
 github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.13 h1:OPLEkmhXf6xFPiz0bLeDArZIDx1NNS4oJyG4nv3Gct0=
+github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.13/go.mod h1:gpAbvyDGQFozTEmlTFO8XcQKHzubdq0LzRyJpG6MiXM=
 github.com/aws/aws-sdk-go-v2/config v1.18.41 h1:Go7z97YDsBJVNAaL7pDPKB6LeHEsAkHmFe+CeK30fUQ=
 github.com/aws/aws-sdk-go-v2/config v1.18.41/go.mod h1:+yR45+A0LIMKT8bWOKo90Hy9rSrovEmEKoPKLmmVec8=
 github.com/aws/aws-sdk-go-v2/credentials v1.13.39 h1:UnwBXDIHKDaejSXaRzKR57IdGCizk+z1DEhnsFpus7Q=
@@ -16,6 +17,7 @@ github.com/aws/aws-sdk-go-v2/internal/ini v1.3.42/go.mod h1:rzfdUlfA+jdgLDmPKjd3
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.35 h1:CdzPW9kKitgIiLV1+MHobfR5Xg25iYnyzWZhyQuSlDI=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.35/go.mod h1:QGF2Rs33W5MaN9gYdEQOBBFPLwTZkEhRwI33f7KIG0o=
 github.com/aws/aws-sdk-go-v2/service/lambda v1.39.5 h1:uMvxJFS92hNW6BRX0Ou+5zb9DskgrJQHZ+5yT8FXK5Y=
+github.com/aws/aws-sdk-go-v2/service/lambda v1.39.5/go.mod h1:ByLHcf0zbHpyLTOy1iPVRPJWmAUPCiJv5k81dt52ID8=
 github.com/aws/aws-sdk-go-v2/service/sso v1.14.0 h1:AR/hlTsCyk1CwlyKnPFvIMvnONydRjDDRT9OGb0i+/g=
 github.com/aws/aws-sdk-go-v2/service/sso v1.14.0/go.mod h1:fIAwKQKBFu90pBxx07BFOMJLpRUGu8VOzLJakeY+0K4=
 github.com/aws/aws-sdk-go-v2/service/ssooidc v1.17.0 h1:UniOmlPJelksyP5dGjfRoFTmLDy4/o0HH1lK2Op7zC8=
@@ -27,6 +29,7 @@ github.com/aws/smithy-go v1.14.2/go.mod h1:Tg+OJXh4MB2R/uN61Ko2f6hTZwB/ZYGOtib8J
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/go-cmp v0.5.8/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
+github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1/go.mod h1:L3OGu8Wl2/fWfCI6z80xFu9LTZmf1ZRjMHUOPmWr69U=
@@ -42,6 +45,7 @@ github.com/shogo82148/goat v0.0.6/go.mod h1:J5sGtFsP9R1Mh6OLSbCec8pVmXy3oQGaYUj1
 github.com/shogo82148/memoize v0.0.2 h1:KBHGjTpwuKPyCzpNlpNT79hKfmJaheHxpIuqdGzqdIE=
 github.com/shogo82148/memoize v0.0.2/go.mod h1:sOsvhOlJGVR2nHgCzUchvbEeYB6jNvSP9o4SPHgb+bY=
 github.com/shogo82148/pointer v1.2.0 h1:MEPjAx9hK17sdEVhaqHROphdy+RxTH70vaBypZzZ/d8=
+github.com/shogo82148/pointer v1.2.0/go.mod h1:agZ5JFpavFPXznbWonIvbG78NDfvDTFppe+7o53up5w=
 github.com/shogo82148/ridgenative v1.4.0 h1:yBsshqKQ86Y155CzgW3iC34DPwpcClceCJ8JQBd36UE=
 github.com/shogo82148/ridgenative v1.4.0/go.mod h1:PInWLpQIV0RsZI3j81ZH87hQ2knhDiMGbeDuTli3QIE=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
