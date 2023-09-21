@@ -28,6 +28,9 @@ jobs:
           make test
         working-directory: provider/assume-role
 
+      - name: report coverage
+        uses: k1LoW/octocov-action@v0
+
   action:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
