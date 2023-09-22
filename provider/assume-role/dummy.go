@@ -59,7 +59,10 @@ func (c *githubClientDummy) GetUser(ctx context.Context, nextIDFormat bool, toke
 }
 
 func (c *githubClientDummy) ParseIDToken(ctx context.Context, idToken string) (*github.ActionsIDToken, error) {
-	return nil, errors.New("invalid jwt")
+	if idToken != "dummyGitHubIDToken" {
+		return nil, errors.New("invalid id token")
+	}
+	return &github.ActionsIDToken{}, nil
 }
 
 func (c *githubClientDummy) ValidateAPIURL(url string) error {
