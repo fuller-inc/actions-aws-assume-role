@@ -13,6 +13,19 @@ import (
 )
 
 func main() {
+	f, err := os.OpenFile("dummy.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	log.SetOutput(f)
+
+	if err := serve(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func serve() error {
 	chSignal := make(chan os.Signal, 1)
 	signal.Notify(chSignal, syscall.SIGINT, syscall.SIGTERM)
 	defer signal.Stop(chSignal)
@@ -32,7 +45,7 @@ func main() {
 
 	select {
 	case err := <-chServe:
-		log.Fatal(err)
+		return err
 	case <-chSignal:
 	}
 
@@ -41,8 +54,10 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := s.Shutdown(ctx); err != nil {
-		log.Fatal(err)
+		return err
 	}
 	s.Close()
 	<-chServe
+
+	return nil
 }
