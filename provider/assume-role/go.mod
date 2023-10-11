@@ -10,7 +10,7 @@ require (
 	github.com/shogo82148/aws-xray-yasdk-go v1.7.1
 	github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.4
 	github.com/shogo82148/ctxlog v0.1.0
-	github.com/shogo82148/goat v0.0.6
+	github.com/shogo82148/goat v0.1.0
 	github.com/shogo82148/ridgenative v1.4.0
 )
 
@@ -23,7 +23,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.36 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.15.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.17.2 // indirect
-	github.com/shogo82148/memoize v0.0.2 // indirect
-	golang.org/x/crypto v0.11.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
+	github.com/shogo82148/memoize v0.0.4 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
 )

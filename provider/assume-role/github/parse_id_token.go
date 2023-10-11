@@ -2,9 +2,9 @@ package github
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
+	"github.com/shogo82148/goat/jwa"
 	_ "github.com/shogo82148/goat/jwa/rs"
 	"github.com/shogo82148/goat/jws"
 	"github.com/shogo82148/goat/jwt"
@@ -41,22 +41,25 @@ func (c *Client) ParseIDToken(ctx context.Context, idToken string) (*ActionsIDTo
 	if err != nil {
 		return nil, fmt.Errorf("github: failed to get JWK Set: %w", err)
 	}
-	token, err := jwt.Parse([]byte(idToken), jwt.FindKeyFunc(func(header *jws.Header) (key sig.SigningKey, err error) {
-		jwk, ok := set.Find(header.KeyID())
-		if !ok {
-			return nil, fmt.Errorf("github: kid %s is not found", header.KeyID())
-		}
-		if jwk.Algorithm() != "" && header.Algorithm().KeyAlgorithm() != jwk.Algorithm() {
-			return nil, fmt.Errorf("github: alg parameter mismatch")
-		}
-		key = header.Algorithm().New().NewSigningKey(jwk)
-		return
-	}))
+	p := &jwt.Parser{
+		KeyFinder: jwt.FindKeyFunc(func(ctx context.Context, header *jws.Header) (key sig.SigningKey, err error) {
+			jwk, ok := set.Find(header.KeyID())
+			if !ok {
+				return nil, fmt.Errorf("github: kid %s is not found", header.KeyID())
+			}
+			if jwk.Algorithm() != "" && header.Algorithm().KeyAlgorithm() != jwk.Algorithm() {
+				return nil, fmt.Errorf("github: alg parameter mismatch")
+			}
+			key = header.Algorithm().New().NewSigningKey(jwk)
+			return
+		}),
+		AlgorithmVerifier:     jwt.AllowedAlgorithms{jwa.RS256},
+		IssuerSubjectVerifier: jwt.Issuer(oidcIssuer),
+		AudienceVerifier:      jwt.UnsecureAnyAudience,
+	}
+	token, err := p.Parse(ctx, []byte(idToken))
 	if err != nil {
 		return nil, fmt.Errorf("github: failed to parse id token: %w", err)
-	}
-	if token.Claims.Issuer != oidcIssuer {
-		return nil, errors.New("github: failed to parse id token: invalid issuer")
 	}
 
 	var claims ActionsIDToken
