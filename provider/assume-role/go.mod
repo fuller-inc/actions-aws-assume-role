@@ -5,7 +5,7 @@ go 1.21.1
 require (
 	github.com/aws/aws-sdk-go-v2 v1.23.0
 	github.com/aws/aws-sdk-go-v2/config v1.25.1
-	github.com/aws/aws-sdk-go-v2/service/sts v1.25.2
+	github.com/aws/aws-sdk-go-v2/service/sts v1.25.3
 	github.com/aws/smithy-go v1.17.0
 	github.com/shogo82148/aws-xray-yasdk-go v1.7.2
 	github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.5
