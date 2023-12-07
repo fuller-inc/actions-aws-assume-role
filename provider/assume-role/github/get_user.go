@@ -47,8 +47,8 @@ func (c *Client) GetUser(ctx context.Context, nextIDFormat bool, token, user str
 	defer resp.Body.Close()
 
 	// parse the response
-	if resp.StatusCode != http.StatusOK {
-		return nil, &UnexpectedStatusCodeError{StatusCode: resp.StatusCode}
+	if err := handleUnexpectedStatusCode(resp); err != nil {
+		return nil, err
 	}
 
 	var ret *GetUserResponse
