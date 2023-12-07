@@ -72,8 +72,8 @@ func (c *Client) CreateStatus(ctx context.Context, token, owner, repo, ref strin
 	defer resp.Body.Close()
 
 	// parse the response
-	if resp.StatusCode != http.StatusCreated {
-		return nil, &UnexpectedStatusCodeError{StatusCode: resp.StatusCode}
+	if err := handleUnexpectedStatusCode(resp); err != nil {
+		return nil, err
 	}
 
 	var ret *CreateStatusResponse
