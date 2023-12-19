@@ -25,6 +25,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.18.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.21.5 // indirect
 	github.com/shogo82148/memoize v0.0.4 // indirect
-	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 )
