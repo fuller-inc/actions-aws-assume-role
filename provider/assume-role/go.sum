@@ -34,8 +34,8 @@ github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9Y
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
 github.com/shogo82148/aws-xray-yasdk-go v1.7.4 h1:lImR7K/WbPoFqb6BGM/xnpGD2s4JnQ3WV7thWjDdjG0=
 github.com/shogo82148/aws-xray-yasdk-go v1.7.4/go.mod h1:Ou0BdxWM2H5u5FAcTqYUn08XSv+opM56jDULW8MLCRA=
-github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.7 h1:qlOoYjFmUUBLTCA57DSiVHYroQGgsh7JZtpNM//kTUY=
-github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.7/go.mod h1:c4WeDsGxhlVj7Ob0ghEdV+ymYC1lTFt6K3A65kKLi5k=
+github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.8 h1:3V4yvhMFRs/ICsoxcttpQSZhRaWel4KKBbwo+5a7JuA=
+github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.8/go.mod h1:c4WeDsGxhlVj7Ob0ghEdV+ymYC1lTFt6K3A65kKLi5k=
 github.com/shogo82148/ctxlog v0.1.0 h1:WN1kcHxnFFPrqMNKK+ZM8GKrjqAKQymWekjeq6EZ7ao=
 github.com/shogo82148/ctxlog v0.1.0/go.mod h1:1vzyF5O3lITc5QGi4oYH12DwupLpZytmfxdN2vH1ZZ0=
 github.com/shogo82148/goat v0.1.0 h1:CD8v23E0rGSspMyKnS2FqiX+BJnEYs/mhgYDmo4i30k=
