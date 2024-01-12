@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 	"github.com/aws/smithy-go"
 	"github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/github"
+	"github.com/shogo82148/goat/jwt"
 )
 
 var errAccessDenied = &awsAccessDeniedError{}
@@ -24,7 +25,7 @@ func (err *awsAccessDeniedError) ErrorFault() smithy.ErrorFault { return smithy.
 type githubClientDummy struct{}
 
 func (c *githubClientDummy) CreateStatus(ctx context.Context, token, owner, repo, ref string, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error) {
-	if token != "ghs_dummyGitHubToken" || owner != "shogo82148" || repo != "actions-aws-assume-role" || ref != "e3a45c6c16c1464826b36a598ff39e6cc98c4da4" {
+	if token != "ghs_dummyGitHubToken" || owner != "fuller-inc" || repo != "actions-aws-assume-role" || ref != "e3a45c6c16c1464826b36a598ff39e6cc98c4da4" {
 		return nil, &github.UnexpectedStatusCodeError{StatusCode: http.StatusBadRequest}
 	}
 	return &github.CreateStatusResponse{
@@ -59,7 +60,21 @@ func (c *githubClientDummy) GetUser(ctx context.Context, nextIDFormat bool, toke
 }
 
 func (c *githubClientDummy) ParseIDToken(ctx context.Context, idToken string) (*github.ActionsIDToken, error) {
-	return nil, errors.New("invalid jwt")
+	if idToken != "dummyGitHubIDToken" {
+		return nil, errors.New("invalid id token")
+	}
+	return &github.ActionsIDToken{
+		Claims: &jwt.Claims{
+			Subject:  "repo:fuller-inc/actions-aws-assume-role:ref:refs/heads/main",
+			Audience: []string{"https://github.com/fuller-inc/actions-aws-assume-role"},
+		},
+		Repository: "fuller-inc/actions-aws-assume-role",
+		Workflow:   "test",
+		RunID:      "1234567890",
+		Actor:      "fuller-inc",
+		SHA:        "e3a45c6c16c1464826b36a598ff39e6cc98c4da4",
+		Ref:        "refs/heads/main",
+	}, nil
 }
 
 func (c *githubClientDummy) ValidateAPIURL(url string) error {

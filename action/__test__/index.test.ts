@@ -1,85 +1,103 @@
-import * as os from 'os';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as exec from '@actions/exec';
-import * as io from '@actions/io';
-import * as child_process from 'child_process';
-import * as index from '../src/index';
+import * as os from "os";
+import * as fs from "fs";
+import * as path from "path";
+import * as exec from "@actions/exec";
+import * as io from "@actions/io";
+import * as core from "@actions/core";
+import * as child_process from "child_process";
+import * as index from "../src/index";
 
 const sep = path.sep;
 
+jest.mock("@actions/core");
+
 // extension of executable files
-const binExt = os.platform() === 'win32' ? '.exe' : '';
+const binExt = os.platform() === "win32" ? ".exe" : "";
 
-process.env.GITHUB_REPOSITORY = 'shogo82148/actions-aws-assume-role';
-process.env.GITHUB_WORKFLOW = 'test';
-process.env.GITHUB_RUN_ID = '1234567890';
-process.env.GITHUB_ACTOR = 'shogo82148';
-process.env.GITHUB_SHA = 'e3a45c6c16c1464826b36a598ff39e6cc98c4da4';
-process.env.GITHUB_REF = 'ref/heads/main';
+process.env.GITHUB_REPOSITORY = "fuller-inc/actions-aws-assume-role";
+process.env.GITHUB_WORKFLOW = "test";
+process.env.GITHUB_RUN_ID = "1234567890";
+process.env.GITHUB_ACTOR = "fuller-inc";
+process.env.GITHUB_SHA = "e3a45c6c16c1464826b36a598ff39e6cc98c4da4";
+process.env.GITHUB_REF = "ref/heads/main";
 
-describe('tests', () => {
-  let tmpdir = '';
+// set dummy id token endpoint
+process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN = "dummy";
+process.env.ACTIONS_ID_TOKEN_REQUEST_URL = "https://example.com";
+
+describe("tests", () => {
+  let tmpdir = "";
   let subprocess: child_process.ChildProcess;
   beforeAll(async () => {
     tmpdir = await mkdtemp();
     const bin = `${tmpdir}${sep}dummy${binExt}`;
 
-    console.log('compiling dummy server');
+    console.log("compiling dummy server");
     await exec.exec(
-      'go',
-      ['build', '-o', bin, 'github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/cmd/dummy'],
+      "go",
+      ["build", "-o", bin, "github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/cmd/dummy"],
       {
-        cwd: `..${sep}provider${sep}assume-role`
-      }
+        cwd: `..${sep}provider${sep}assume-role`,
+      },
     );
 
-    console.log('starting dummy server');
+    console.log("starting dummy server");
     subprocess = child_process.spawn(bin, [], {
       detached: true,
-      stdio: 'ignore'
+      stdio: "ignore",
     });
     await sleep(1); // wait for starting process
   }, 5 * 60000);
 
   afterAll(async () => {
-    console.log('killing dummy server');
-    subprocess?.kill('SIGTERM');
+    console.log("killing dummy server");
+    subprocess?.kill("SIGTERM");
     await sleep(1); // wait for stopping process
     await io.rmRF(tmpdir);
   });
 
-  it('succeed', async () => {
+  it("succeed", async () => {
+    (core.getIDToken as jest.Mock).mockResolvedValueOnce("dummyGitHubIDToken");
+
     await index.assumeRole({
-      githubToken: 'ghs_dummyGitHubToken',
-      awsRegion: 'us-east-1',
-      roleToAssume: 'arn:aws:iam::123456789012:role/assume-role-test',
+      githubToken: "ghs_dummyGitHubToken",
+      awsRegion: "us-east-1",
+      roleToAssume: "arn:aws:iam::123456789012:role/assume-role-test",
       roleDurationSeconds: 900,
-      roleSessionName: 'GitHubActions',
+      roleSessionName: "GitHubActions",
       roleSessionTagging: true,
-      providerEndpoint: 'http://localhost:8080',
+      providerEndpoint: "http://localhost:8080",
       useNodeId: false,
-      obfuscateRepository: ''
+      obfuscateRepository: "",
     });
-    expect(process.env.AWS_ACCESS_KEY_ID).toBe('AKIAIOSFODNN7EXAMPLE');
-    expect(process.env.AWS_SECRET_ACCESS_KEY).toBe('wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY');
-    expect(process.env.AWS_SESSION_TOKEN).toBe('session-token');
-    expect(process.env.AWS_DEFAULT_REGION).toBe('us-east-1');
-    expect(process.env.AWS_REGION).toBe('us-east-1');
+
+    const exportVariable = core.exportVariable as jest.Mock;
+    expect(exportVariable).toHaveBeenCalledWith("AWS_ACCESS_KEY_ID", "AKIAIOSFODNN7EXAMPLE");
+    expect(exportVariable).toHaveBeenCalledWith("AWS_SECRET_ACCESS_KEY", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY");
+    expect(exportVariable).toHaveBeenCalledWith("AWS_SESSION_TOKEN", "session-token");
+    expect(exportVariable).toHaveBeenCalledWith("AWS_DEFAULT_REGION", "us-east-1");
+    expect(exportVariable).toHaveBeenCalledWith("AWS_REGION", "us-east-1");
+
+    const setSecret = core.setSecret as jest.Mock;
+    expect(setSecret).toHaveBeenCalledWith("AKIAIOSFODNN7EXAMPLE");
+    expect(setSecret).toHaveBeenCalledWith("wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY");
+    expect(setSecret).toHaveBeenCalledWith("session-token");
   });
 
-  it('invalid GitHub Token', async () => {
+  it("invalid GitHub ID Token", async () => {
     await expect(async () => {
+      (core.getIDToken as jest.Mock).mockResolvedValueOnce("invalid");
+
       await index.assumeRole({
-        githubToken: 'ghp_dummyPersonalGitHubToken',
-        awsRegion: 'us-east-1',
-        roleToAssume: 'arn:aws:iam::123456789012:role/assume-role-test',
+        githubToken: "ghp_dummyPersonalGitHubToken",
+        awsRegion: "us-east-1",
+        roleToAssume: "arn:aws:iam::123456789012:role/assume-role-test",
         roleDurationSeconds: 900,
-        roleSessionName: 'GitHubActions',
+        roleSessionName: "GitHubActions",
         roleSessionTagging: true,
-        providerEndpoint: 'http://localhost:8080',
+        providerEndpoint: "http://localhost:8080",
         useNodeId: false,
-        obfuscateRepository: ''
+        obfuscateRepository: "",
       });
     }).rejects.toThrow();
   });
