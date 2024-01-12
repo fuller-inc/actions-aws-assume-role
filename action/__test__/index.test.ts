@@ -6,6 +6,7 @@ import * as io from "@actions/io";
 import * as core from "@actions/core";
 import * as child_process from "child_process";
 import * as index from "../src/index";
+import { jest, describe, expect, beforeAll, afterAll, it } from "@jest/globals";
 
 const sep = path.sep;
 
@@ -57,7 +58,8 @@ describe("tests", () => {
   });
 
   it("succeed", async () => {
-    (core.getIDToken as jest.Mock).mockResolvedValueOnce("dummyGitHubIDToken");
+    const getIDToken = core.getIDToken as jest.Mock<typeof core.getIDToken>;
+    getIDToken.mockResolvedValueOnce("dummyGitHubIDToken");
 
     await index.assumeRole({
       githubToken: "ghs_dummyGitHubToken",
@@ -85,7 +87,8 @@ describe("tests", () => {
 
   it("invalid GitHub ID Token", async () => {
     await expect(async () => {
-      (core.getIDToken as jest.Mock).mockResolvedValueOnce("invalid");
+      const getIDToken = core.getIDToken as jest.Mock<typeof core.getIDToken>;
+      getIDToken.mockResolvedValueOnce("invalidGitHubIDToken");
 
       await index.assumeRole({
         githubToken: "ghp_dummyPersonalGitHubToken",
