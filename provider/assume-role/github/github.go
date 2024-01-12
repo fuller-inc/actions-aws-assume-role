@@ -3,6 +3,7 @@ package github
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -39,10 +40,25 @@ func init() {
 
 type UnexpectedStatusCodeError struct {
 	StatusCode int
+	Body       string
 }
 
 func (err *UnexpectedStatusCodeError) Error() string {
-	return fmt.Sprintf("unexpected status code: %d", err.StatusCode)
+	return fmt.Sprintf("unexpected status code: %d, body: %q", err.StatusCode, err.Body)
+}
+
+func handleUnexpectedStatusCode(resp *http.Response) error {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			body = []byte("error: " + err.Error())
+		}
+		return &UnexpectedStatusCodeError{
+			StatusCode: resp.StatusCode,
+			Body:       string(body),
+		}
+	}
+	return nil
 }
 
 // Client is a very light weight GitHub API Client.

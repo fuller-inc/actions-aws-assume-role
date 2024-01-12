@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -20,10 +21,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sts/types"
 	"github.com/aws/smithy-go"
 	"github.com/fuller-inc/actions-aws-assume-role/provider/assume-role/github"
-	"github.com/shogo82148/aws-xray-yasdk-go/xray"
 	"github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2"
 	"github.com/shogo82148/aws-xray-yasdk-go/xrayhttp"
-	log "github.com/shogo82148/ctxlog"
 )
 
 const (
@@ -64,13 +63,15 @@ func NewHandler() *Handler {
 
 	cfg, err := config.LoadDefaultConfig(ctx, xrayaws.WithXRay())
 	if err != nil {
-		log.Fatalf("unable to load SDK config, %v", err)
+		slog.ErrorContext(ctx, "unable to load SDK config", slog.String("error", err.Error()))
+		panic(err)
 	}
 
 	client := xrayhttp.Client(nil)
 	githubClient, err := github.NewClient(client)
 	if err != nil {
-		log.Fatalf("unable to initialize: %v", err)
+		slog.ErrorContext(ctx, "unable to create github client", slog.String("error", err.Error()))
+		panic(err)
 	}
 
 	return &Handler{
@@ -111,9 +112,6 @@ type errorResponseBody struct {
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	ctx = log.With(ctx, log.Fields{
-		"x-amzn-trace-id": xray.ContextTraceID(ctx),
-	})
 
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -136,7 +134,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		log.Printf("failed to write the response: %v", err)
+		slog.InfoContext(ctx, "failed to write the response", slog.String("error", err.Error()))
 	}
 }
 
@@ -156,7 +154,7 @@ func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, 
 			}
 		}
 	} else {
-		log.Warn(ctx, "oidc is not available", nil)
+		slog.InfoContext(ctx, "OIDC token is not available")
 		warning = "Using GITHUB_TOKEN is deprecated. Use OIDC instead of it. " +
 			"See https://github.com/fuller-inc/actions-aws-assume-role/issues/454 and https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect"
 		if err := h.validateGitHubToken(ctx, req); err != nil {
@@ -183,7 +181,7 @@ func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, 
 	resp1.Warning += "It looks that you use legacy node IDs. You need to migrate them. " +
 		"See https://github.com/fuller-inc/actions-aws-assume-role#migrate-your-node-id-to-the-next-format for more detail.\n" +
 		err0.Error()
-	log.Warn(ctx, "using legacy node id", nil)
+	slog.InfoContext(ctx, "using legacy node id")
 	return resp1, nil
 }
 
@@ -235,7 +233,7 @@ func (h *Handler) validate(ctx context.Context, req *requestBody) error {
 }
 
 func (h *Handler) handleError(w http.ResponseWriter, r *http.Request, err error) {
-	log.Printf("error: %v", err)
+	slog.ErrorContext(r.Context(), "failed to handle the request", slog.String("error", err.Error()))
 	status := http.StatusInternalServerError
 	var body *errorResponseBody
 
