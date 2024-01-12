@@ -1,6 +1,6 @@
 module github.com/fuller-inc/actions-aws-assume-role/provider/assume-role
 
-go 1.21.1
+go 1.21.6
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.24.1
@@ -9,7 +9,6 @@ require (
 	github.com/aws/smithy-go v1.19.0
 	github.com/shogo82148/aws-xray-yasdk-go v1.8.0
 	github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.9
-	github.com/shogo82148/ctxlog v0.1.0
 	github.com/shogo82148/goat v0.1.0
 	github.com/shogo82148/ridgenative v1.4.0
 )
