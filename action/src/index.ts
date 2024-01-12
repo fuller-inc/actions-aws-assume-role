@@ -10,7 +10,6 @@ interface AssumeRoleParams {
   roleSessionTagging: boolean;
   providerEndpoint: string;
   useNodeId: boolean;
-  obfuscateRepository: string;
 }
 
 interface AssumeRolePayload {
@@ -119,7 +118,6 @@ export async function assumeRole(params: AssumeRoleParams) {
     api_url: GITHUB_API_URL,
     repository: GITHUB_REPOSITORY,
     use_node_id: params.useNodeId,
-    obfuscate_repository: params.obfuscateRepository,
     sha: GITHUB_SHA,
     role_session_tagging: params.roleSessionTagging,
     run_id: GITHUB_RUN_ID,
@@ -171,7 +169,6 @@ async function run() {
     const providerEndpoint =
       core.getInput("provider-endpoint") || "https://uw4qs7ndjj.execute-api.us-east-1.amazonaws.com/assume-role";
     const useNodeId = core.getBooleanInput("use-node-id", required);
-    const obfuscateRepository = core.getInput("obfuscate-repository");
     if (roleDurationSeconds <= 0 || roleDurationSeconds > 60 * 60) {
       core.setFailed(`invalid role-duration-seconds ${roleDurationSeconds}, it should be from 1 to 3600`);
     }
@@ -184,7 +181,6 @@ async function run() {
       roleSessionTagging,
       providerEndpoint,
       useNodeId,
-      obfuscateRepository,
     });
   } catch (error) {
     if (error instanceof Error) {
