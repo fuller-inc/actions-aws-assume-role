@@ -21,7 +21,6 @@ interface AssumeRolePayload {
   api_url: string;
   repository: string;
   use_node_id: boolean;
-  obfuscate_repository: string;
   sha: string;
   role_session_tagging: boolean;
   run_id: string;
