@@ -68,7 +68,6 @@ describe("tests", () => {
       roleSessionTagging: true,
       providerEndpoint: "http://localhost:8080",
       useNodeId: false,
-      obfuscateRepository: "",
     });
 
     const exportVariable = core.exportVariable as jest.Mock;
@@ -97,7 +96,6 @@ describe("tests", () => {
         roleSessionTagging: true,
         providerEndpoint: "http://localhost:8080",
         useNodeId: false,
-        obfuscateRepository: "",
       });
     }).rejects.toThrow();
   });
