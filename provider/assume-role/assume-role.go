@@ -2,8 +2,6 @@ package assumerole
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -81,21 +79,20 @@ func NewHandler() *Handler {
 }
 
 type requestBody struct {
-	GitHubToken         string `json:"github_token"`
-	IDToken             string `json:"id_token"`
-	RoleToAssume        string `json:"role_to_assume"`
-	RoleSessionName     string `json:"role_session_name"`
-	DurationSeconds     int32  `json:"duration_seconds"`
-	Repository          string `json:"repository"`
-	UseNodeID           bool   `json:"use_node_id"`
-	ObfuscateRepository string `json:"obfuscate_repository"`
-	APIURL              string `json:"api_url"`
-	SHA                 string `json:"sha"`
-	RoleSessionTagging  bool   `json:"role_session_tagging"`
-	RunID               string `json:"run_id"`
-	Workflow            string `json:"workflow"`
-	Actor               string `json:"actor"`
-	Branch              string `json:"branch"`
+	GitHubToken        string `json:"github_token"`
+	IDToken            string `json:"id_token"`
+	RoleToAssume       string `json:"role_to_assume"`
+	RoleSessionName    string `json:"role_session_name"`
+	DurationSeconds    int32  `json:"duration_seconds"`
+	Repository         string `json:"repository"`
+	UseNodeID          bool   `json:"use_node_id"`
+	APIURL             string `json:"api_url"`
+	SHA                string `json:"sha"`
+	RoleSessionTagging bool   `json:"role_session_tagging"`
+	RunID              string `json:"run_id"`
+	Workflow           string `json:"workflow"`
+	Actor              string `json:"actor"`
+	Branch             string `json:"branch"`
 }
 
 type responseBody struct {
@@ -520,17 +517,7 @@ func (h *Handler) assumeRole(ctx context.Context, nextIDFormat bool, idToken *gi
 	if req.UseNodeID {
 		input.ExternalId = aws.String(repo.NodeID)
 	} else {
-		switch req.ObfuscateRepository {
-		case "sha256":
-			hash := sha256.Sum256([]byte(req.Repository))
-			input.ExternalId = aws.String("sha256:" + hex.EncodeToString(hash[:]))
-		case "":
-			input.ExternalId = aws.String(req.Repository)
-		default:
-			return nil, &validationError{
-				message: fmt.Sprintf("invalid obfuscate repository type: %s", req.ObfuscateRepository),
-			}
-		}
+		input.ExternalId = aws.String(req.Repository)
 	}
 	input.DurationSeconds = aws.Int32(req.DurationSeconds)
 	resp, err := h.sts.AssumeRole(ctx, &input)
