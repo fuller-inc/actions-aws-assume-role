@@ -10,7 +10,7 @@ require (
 	github.com/shogo82148/aws-xray-yasdk-go v1.8.0
 	github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.9
 	github.com/shogo82148/goat v0.1.0
-	github.com/shogo82148/ridgenative v1.4.0
+	github.com/shogo82148/ridgenative v1.5.0
 )
 
 require (
