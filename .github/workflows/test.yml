@@ -30,7 +30,7 @@ jobs:
         working-directory: provider/assume-role
 
       - name: report coverage
-        uses: k1LoW/octocov-action@v0
+        uses: k1LoW/octocov-action@v1
 
   action:
     runs-on: ${{ matrix.os }}
