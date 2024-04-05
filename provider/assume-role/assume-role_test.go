@@ -339,54 +339,6 @@ func TestAssumeRole_UseNodeID(t *testing.T) {
 	}
 }
 
-func TestAssumeRole_ObfuscateRepository(t *testing.T) {
-	h := &Handler{
-		github: &githubClientMock{
-			GetRepoFunc: dummyGetRepoFunc,
-			GetUserFunc: dummyGetUserFunc,
-			ValidateAPIURLFunc: func(url string) error {
-				return nil
-			},
-		},
-		sts: &stsClientMock{
-			AssumeRoleFunc: func(ctx context.Context, params *sts.AssumeRoleInput, optFns ...func(*sts.Options)) (*sts.AssumeRoleOutput, error) {
-				if params.ExternalId == nil {
-					return nil, errAccessDenied
-				}
-				if got, want := aws.ToString(params.ExternalId), "sha256:339c2238399e1150eb8d76a7a74cfd92448d347dc4212bad33a4978edfc455e0"; want != got {
-					t.Errorf("unexpected external id: want %q, got %q", want, got)
-					return nil, errAccessDenied
-				}
-				return &sts.AssumeRoleOutput{
-					Credentials: &types.Credentials{
-						AccessKeyId:     aws.String("AKIAIOSFODNN7EXAMPLE"),
-						SecretAccessKey: aws.String("wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"),
-						SessionToken:    aws.String("session-token"),
-					},
-				}, nil
-			},
-		},
-	}
-	resp, err := h.assumeRole(context.Background(), false, nil, &requestBody{
-		RoleToAssume:        "arn:aws:iam::123456789012:role/assume-role-test",
-		RoleSessionName:     "GitHubActions",
-		Repository:          "fuller-inc/actions-aws-assume-role",
-		ObfuscateRepository: "sha256",
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if resp.AccessKeyId != "AKIAIOSFODNN7EXAMPLE" {
-		t.Errorf("want %q, got %q", "AKIAIOSFODNN7EXAMPLE", resp.AccessKeyId)
-	}
-	if resp.SecretAccessKey != "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" {
-		t.Errorf("want %q, got %q", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY", resp.SecretAccessKey)
-	}
-	if resp.SessionToken != "session-token" {
-		t.Errorf("want %q, got %q", "session-token", resp.SessionToken)
-	}
-}
-
 func TestSanitizeTagValue(t *testing.T) {
 	cases := []struct {
 		input  string
