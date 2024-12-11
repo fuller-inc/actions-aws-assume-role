@@ -25,6 +25,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.26.8 // indirect
 	github.com/shogo82148/forwarded-header v0.1.0 // indirect
 	github.com/shogo82148/memoize v0.0.4 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
 )
