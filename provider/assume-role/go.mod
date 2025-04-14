@@ -1,6 +1,8 @@
 module github.com/fuller-inc/actions-aws-assume-role/provider/assume-role
 
 go 1.21.6
+toolchain go1.24.1
+
 require (
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.13
@@ -24,6 +26,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.1 // indirect
 	github.com/shogo82148/forwarded-header v0.1.0 // indirect
 	github.com/shogo82148/memoize v0.0.4 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
 )
