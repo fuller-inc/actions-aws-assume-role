@@ -21,7 +21,7 @@ Resources:
     Properties:
       CodeUri: assume-role/
       Handler: assume-role
-      Runtime: provided.al2
+      Runtime: provided.al2023
       Architectures: [arm64]
       Tracing: Active
       Events:
