@@ -19,8 +19,7 @@ func TestParseIDToken_Integrated(t *testing.T) {
 		t.Skip("it is not in GitHub Actions Environment")
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 
 	t.Logf("the request started at %s", time.Now())
 	token, err := getIdToken(ctx, idToken, idURL)

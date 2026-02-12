@@ -320,16 +320,13 @@ func (h *Handler) validateGitHubToken(ctx context.Context, req *requestBody) err
 }
 
 func splitOwnerRepo(fullname string) (owner, repo string, err error) {
-	idx := strings.IndexByte(fullname, '/')
-	if idx < 0 {
-		err = &validationError{
+	owner, repo, ok := strings.Cut(fullname, "/")
+	if !ok {
+		return "", "", &validationError{
 			message: fmt.Sprintf("invalid repository name: %s", fullname),
 		}
-		return
 	}
-	owner = fullname[:idx]
-	repo = fullname[idx+1:]
-	return
+	return owner, repo, nil
 }
 
 func (h *Handler) updateCommitStatus(ctx context.Context, req *requestBody, status *github.CreateStatusRequest) (*github.CreateStatusResponse, error) {
