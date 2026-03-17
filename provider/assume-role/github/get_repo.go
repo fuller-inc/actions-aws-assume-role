@@ -28,9 +28,10 @@ func (c *Client) GetRepo(ctx context.Context, nextIDFormat bool, token, owner, r
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Accept", "application/vnd.github.v3+json")
+	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("User-Agent", githubUserAgent)
 	req.Header.Set("Authorization", "token "+token)
+	req.Header.Set("X-Github-Api-Version", githubAPIVersion)
 
 	// for migrating Node IDs
 	// https://github.blog/2021-11-16-graphql-global-id-migration-update/#how-do-i-migrate-my-service

@@ -3,14 +3,28 @@ import * as fs from "fs";
 import * as path from "path";
 import * as exec from "@actions/exec";
 import * as io from "@actions/io";
-import * as core from "@actions/core";
 import * as child_process from "child_process";
-import * as index from "../src/index";
 import { jest, describe, expect, beforeAll, afterAll, it } from "@jest/globals";
 
 const sep = path.sep;
 
-jest.mock("@actions/core");
+// Mock @actions/core before importing the module under test.
+// Note: jest.unstable_mockModule is required for ESM-compatible mocking
+// (jest.mock() hoisting does not work reliably with ESM modules).
+jest.unstable_mockModule("@actions/core", () => ({
+  getIDToken: jest.fn<() => Promise<string>>(),
+  exportVariable: jest.fn<(name: string, val: string) => void>(),
+  setSecret: jest.fn<(secret: string) => void>(),
+  setFailed: jest.fn<(message: string | Error) => void>(),
+  info: jest.fn<(message: string) => void>(),
+  warning: jest.fn<(message: string | Error) => void>(),
+  getBooleanInput: jest.fn<(name: string) => boolean>(),
+  getInput: jest.fn<(name: string) => string>(),
+}));
+
+// Dynamically import the module under test after mocks are set up
+const index = await import("../src/main.js");
+const core = await import("@actions/core");
 
 // extension of executable files
 const binExt = os.platform() === "win32" ? ".exe" : "";
