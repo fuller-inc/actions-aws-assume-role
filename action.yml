@@ -36,8 +36,8 @@ inputs:
 
 runs:
   using: "node24"
-  main: "action/lib/index.js"
-  post: "action/lib/cleanup.js"
+  main: "action/dist/index.js"
+  post: "action/dist/cleanup.js"
 branding:
   icon: "cloud"
   color: "blue"
