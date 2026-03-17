@@ -6,14 +6,6 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "exclude": [
-    "dist",
-    "node_modules",
-    "rollup.config.ts"
-  ],
-  "include": [
-    "__test__",
-    "src",
-    "jest.config.js"
-  ]
+  "exclude": ["dist", "node_modules", "rollup.config.ts"],
+  "include": ["__test__", "src", "jest.config.js"]
 }
