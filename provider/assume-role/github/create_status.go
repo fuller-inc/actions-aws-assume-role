@@ -63,6 +63,8 @@ func (c *Client) CreateStatus(ctx context.Context, token, owner, repo, ref strin
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	req.Header.Set("User-Agent", githubUserAgent)
 	req.Header.Set("Authorization", "token "+token)
+	req.Header.Set("X-GitHub-Api-Version", githubAPIVersion)
+	req.Header.Set("X-Github-Next-Global-ID", "1")
 
 	// send the request
 	resp, err := c.httpClient.Do(req)

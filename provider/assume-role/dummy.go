@@ -37,25 +37,15 @@ func (c *githubClientDummy) CreateStatus(ctx context.Context, token, owner, repo
 	}, nil
 }
 
-func (c *githubClientDummy) GetRepo(ctx context.Context, nextIDFormat bool, token, owner, repo string) (*github.GetRepoResponse, error) {
-	if nextIDFormat {
-		return &github.GetRepoResponse{
-			NodeID: "R_kgDOFMsDjw",
-		}, nil
-	}
+func (c *githubClientDummy) GetRepo(ctx context.Context, token, owner, repo string) (*github.GetRepoResponse, error) {
 	return &github.GetRepoResponse{
-		NodeID: "MDEwOlJlcG9zaXRvcnkzNDg4NDkwMzk=",
+		NodeID: "R_kgDOFMsDjw",
 	}, nil
 }
 
-func (c *githubClientDummy) GetUser(ctx context.Context, nextIDFormat bool, token, user string) (*github.GetUserResponse, error) {
-	if nextIDFormat {
-		return &github.GetUserResponse{
-			NodeID: "U_kgDOABGo4A",
-		}, nil
-	}
+func (c *githubClientDummy) GetUser(ctx context.Context, token, user string) (*github.GetUserResponse, error) {
 	return &github.GetUserResponse{
-		NodeID: "MDQ6VXNlcjExNTczNDQ=",
+		NodeID: "U_kgDOABGo4A",
 	}, nil
 }
 

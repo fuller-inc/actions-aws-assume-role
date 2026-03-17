@@ -19,6 +19,14 @@ func TestCreateStatus(t *testing.T) {
 		if r.URL.Path != path {
 			t.Errorf("unexpected path: want %q, got %q", path, r.URL.Path)
 		}
+		apiVersion := r.Header.Get("X-GitHub-Api-Version")
+		if apiVersion != "2026-03-10" {
+			t.Errorf("unexpected X-GitHub-Api-Version header: want %s, got %s", "2026-03-10", apiVersion)
+		}
+		idFormat := r.Header.Get("X-Github-Next-Global-ID")
+		if idFormat != "1" {
+			t.Errorf("unexpected X-Github-Next-Global-ID header: want %s, got %s", "1", idFormat)
+		}
 
 		data, err := os.ReadFile("testdata/status-created.json")
 		if err != nil {

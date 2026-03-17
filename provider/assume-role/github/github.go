@@ -21,6 +21,10 @@ const (
 	defaultAPIBaseURL = "https://api.github.com"
 
 	oidcIssuer = "https://token.actions.githubusercontent.com"
+
+	// The GitHub REST API version to use
+	// https://docs.github.com/en/rest/about-the-rest-api/api-versions
+	githubAPIVersion = "2026-03-10"
 )
 
 var apiBaseURL string
