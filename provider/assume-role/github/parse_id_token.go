@@ -31,7 +31,7 @@ type ActionsIDToken struct {
 	HeadRef              string `jwt:"head_ref"`
 	BaseRef              string `jwt:"base_ref"`
 	EventName            string `jwt:"event_name"`
-	EventType            string `jwt:"branch"`
+	EventType            string `jwt:"event_type"`
 	RefType              string `jwt:"ref_type"`
 	JobWorkflowRef       string `jwt:"job_workflow_ref"`
 }
