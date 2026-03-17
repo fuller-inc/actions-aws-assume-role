@@ -136,7 +136,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, error) {
-	var warning string
+	warning := "This actions is deprecated. Please migrate to aws-actions/configure-aws-credentials. " +
+		"See https://github.com/fuller-inc/actions-aws-assume-role/issues/958.\n"
 	if err := h.validate(ctx, req); err != nil {
 		return nil, err
 	}
@@ -152,8 +153,8 @@ func (h *Handler) handle(ctx context.Context, req *requestBody) (*responseBody, 
 		}
 	} else {
 		slog.InfoContext(ctx, "OIDC token is not available")
-		warning = "Using GITHUB_TOKEN is deprecated. Use OIDC instead of it. " +
-			"See https://github.com/fuller-inc/actions-aws-assume-role/issues/454 and https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect"
+		warning += "Using GITHUB_TOKEN is deprecated. Use OIDC instead of it. " +
+			"See https://github.com/fuller-inc/actions-aws-assume-role/issues/454 and https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect.\n"
 		if err := h.validateGitHubToken(ctx, req); err != nil {
 			return nil, err
 		}
