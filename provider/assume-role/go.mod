@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.41.11
 	github.com/aws/aws-sdk-go-v2/config v1.32.22
 	github.com/aws/aws-sdk-go-v2/service/sts v1.43.1
-	github.com/aws/smithy-go v1.27.0
+	github.com/aws/smithy-go v1.27.1
 	github.com/shogo82148/aws-xray-yasdk-go v1.8.1
 	github.com/shogo82148/aws-xray-yasdk-go/xrayaws-v2 v1.1.10
 	github.com/shogo82148/goat v0.1.1
