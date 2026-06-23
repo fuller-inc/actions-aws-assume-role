@@ -2,6 +2,11 @@
 
 The action configures AWS Credential by assuming roles and [OpenID Connect (OIDC)](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect).
 
+> [!WARNING]
+>
+> This action is now **officially deprecated**.
+> See [#958](https://github.com/fuller-inc/actions-aws-assume-role/issues/958) for more detail.
+
 ## Usage
 
 At first, create an IAM role for your repository.
