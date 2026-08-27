@@ -1,6 +1,6 @@
 module github.com/fuller-inc/actions-aws-assume-role/provider/assume-role
 
-go 1.26.0
+go 1.27.0
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.43.0
